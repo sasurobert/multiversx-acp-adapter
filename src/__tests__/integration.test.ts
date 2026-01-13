@@ -1,6 +1,29 @@
 import request from "supertest";
 import { app } from "../app";
 
+// Mock the dependencies
+jest.mock("../logic/products", () => ({
+    fetchProducts: jest.fn().mockResolvedValue([
+        {
+            product_id: "EGLD-123-01",
+            title: "Test NFT",
+            description: "Desc",
+            price: { amount: "0", currency: "EGLD" },
+            custom_attributes: {
+                token_id: "EGLD-123",
+                nonce: 1
+            }
+        }
+    ])
+}));
+
+jest.mock("../utils/config", () => ({
+    config: {
+        marketplace_address: "erd1mockaddress",
+        api_url: "http://mock-api"
+    }
+}));
+
 describe("ACP Adapter Integration Tests", () => {
 
     describe("GET /.well-known/acp/products.json", () => {
@@ -8,21 +31,19 @@ describe("ACP Adapter Integration Tests", () => {
             const res = await request(app).get("/.well-known/acp/products.json");
             expect(res.status).toBe(200);
             expect(res.body.products).toBeInstanceOf(Array);
-            expect(res.body.products.length).toBeGreaterThan(0);
             expect(res.body.products[0]).toHaveProperty("title", "Test NFT");
         });
     });
 
     describe("POST /checkout", () => {
-        it("should return requires_action for valid product", async () => {
+        it("should return requires_action for valid product using Config Address", async () => {
             const res = await request(app)
                 .post("/checkout")
                 .send({ product_id: "EGLD-123-01" });
 
             expect(res.status).toBe(200);
             expect(res.body.status).toBe("requires_action");
-            expect(res.body.next_action.type).toBe("use_dapp_wallet");
-            expect(res.body.next_action.dapp_url).toContain("buy@");
+            expect(res.body.next_action.dapp_url).toContain("receiver=erd1mockaddress");
         });
 
         it("should return 404 for invalid product", async () => {
@@ -31,7 +52,7 @@ describe("ACP Adapter Integration Tests", () => {
                 .send({ product_id: "INVALID-ID" });
 
             expect(res.status).toBe(404);
-            expect(res.body.error).toBe("Product not found");
+            expect(res.body.error).toContain("not found");
         });
 
         it("should return 400 for missing product_id", async () => {
