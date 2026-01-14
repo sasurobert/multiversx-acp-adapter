@@ -8,6 +8,7 @@ It bridges the gap between OpenAI Agents and the MultiversX Blockchain by provid
 *   **Agentic Product Feed**: Exposes a standard JSON feed at `/.well-known/acp/products.json` that agents can consume to discover on-chain assets.
 *   **Checkout Bridge**: Implements the `POST /checkout` endpoint which constructs MultiversX transaction payloads.
 *   **Wallet Handoff**: Returns the `use_dapp_wallet` action, instructing the Agent to hand off the signing process to the user's secure crypto wallet.
+*   **Delegated Payments (V2)**: Supports "Gasless" transactions via `POST /delegate_payment`, where the Adapter acts as a Relayer. See [V2 Spec](docs/SPEC_V2_RELAYED.md).
 
 ## Installation
 
@@ -32,6 +33,8 @@ npm start
 | :--- | :--- | :--- |
 | `GET` | `/.well-known/acp/products.json` | Returns the list of discoverable products. |
 | `POST` | `/checkout` | Accepts `{ product_id }` and returns a transaction payload. |
+| `POST` | `/delegate_payment` | (V2) Accepts signed `multiversx_relayed` payload from Agent. |
+| `POST` | `/capture` | (V2) Broadcasts the relayed transaction to the blockchain. |
 
 ## Testing
 
