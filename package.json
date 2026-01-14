@@ -12,6 +12,8 @@
   "type": "commonjs",
   "dependencies": {
     "@multiversx/sdk-core": "^15.3.2",
+    "@multiversx/sdk-network-providers": "^2.9.3",
+    "@multiversx/sdk-wallet": "^4.6.0",
     "@types/express": "^5.0.6",
     "@types/node": "^25.0.8",
     "axios": "^1.13.2",

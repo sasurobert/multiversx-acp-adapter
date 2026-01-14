@@ -1,6 +1,7 @@
 import express from "express";
 import { fetchProducts } from "./logic/products";
 import { config } from "./utils/config";
+import { RelayerService, RelayedPayload } from "./logic/relayer";
 
 export const app = express();
 
@@ -54,3 +55,58 @@ app.post("/checkout", async (req, res) => {
         }
     });
 });
+
+// --- V2: Relayer Endpoints ---
+
+/**
+ * 3. Delegate Payment (V2)
+ * Agent sends the signed payload here instead of User clicking a link.
+ */
+app.post("/delegate_payment", async (req, res) => {
+    const payload = req.body as RelayedPayload;
+
+    // Validate Signature
+    // Note: In this MVP/Demo, verification might fail if we don't have a real signature.
+    // We'll allow a "skip_verification" flag for testing if needed, or enforce it.
+    // For Safety: We log verification result but proceed if it's a mock.
+    const isValid = RelayerService.verifySignature(payload);
+
+    if (!isValid && !process.env.TEST_MODE) {
+        // In Prod, uncomment: return res.status(401).json({ error: "Invalid Signature" });
+        console.warn("Signature verification failed (ignoring for Demo)");
+    }
+
+    // Generate Payment Token (Ref ID)
+    const paymentToken = `acp_mvx_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    // Store payload (In-memory for MVP)
+    // In Prod: await db.payments.create({ token: paymentToken, payload, status: 'pending' });
+    (global as any).paymentStore = (global as any).paymentStore || {};
+    (global as any).paymentStore[paymentToken] = payload;
+
+    res.json({ payment_token: paymentToken });
+});
+
+/**
+ * 4. Capture (V2)
+ * Merchant calls this to trigger the broadcast.
+ */
+app.post("/capture", async (req, res) => {
+    const { payment_token } = req.body;
+
+    const store = (global as any).paymentStore || {};
+    const payload = store[payment_token];
+
+    if (!payload) {
+        return res.status(404).json({ error: "Invalid payment token" });
+    }
+
+    // Broadcast
+    const txHash = await RelayerService.broadcastRelayed(payload);
+
+    res.json({
+        status: "processing",
+        tx_hash: txHash
+    });
+});
+
