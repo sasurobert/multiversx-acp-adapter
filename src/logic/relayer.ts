@@ -131,11 +131,19 @@ export class RelayerService {
         try {
             const tx = await this.packRelayedTransaction(payload);
 
-            // TODO: Use ProxyProvider to send
-            // const hash = await provider.sendTransaction(tx);
+            // If in Test Mode, mock the hash
+            if (process.env.TEST_MODE === "true") {
+                console.log("[Relayer] Test Mode: Broadcasting mocked.");
+                return "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
+            }
 
-            // Mock Hash for MVP or Test Mode
-            return "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
+            // Real Broadcast
+            const { ProxyNetworkProvider } = require("@multiversx/sdk-network-providers");
+            const provider = new ProxyNetworkProvider(config.api_url);
+
+            const hash = await provider.sendTransaction(tx);
+            console.log(`[Relayer] Transaction sent: ${hash}`);
+            return hash;
         } catch (e) {
             console.error("Broadcast failed:", e);
             throw e;

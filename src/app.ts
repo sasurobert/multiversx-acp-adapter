@@ -4,13 +4,14 @@ import { config } from "./utils/config";
 import { RelayerService, RelayedPayload } from "./logic/relayer";
 import { NegotiationService, RFP } from "./logic/negotiation";
 import { EscrowService } from "./logic/escrow";
+import { StorageService } from "./logic/storage";
 
 export const app = express();
 
 app.use(express.json());
 
-// In-memory Job Store for MVP
-const jobStore: Record<string, any> = {};
+// Initialize Storage
+StorageService.init();
 
 /**
  * 0. Negotiation Endpoint (ACP Phase 1)
@@ -28,15 +29,12 @@ app.post("/negotiate", async (req, res) => {
 
         const proposal = await NegotiationService.createProposal(rfp);
 
-        // Store Job
-        jobStore[proposal.job_id] = {
+        // Store Job Persistently
+        StorageService.setJob(proposal.job_id, {
             status: "NEGOTIATED",
             rfp,
             proposal
-        };
-
-        // Expose store globally for testing/other endpoints (MVP Hack)
-        (global as any).jobStore = jobStore;
+        });
 
         res.json({
             status: "accepted",
@@ -78,8 +76,7 @@ app.post("/checkout", async (req, res) => {
             return res.status(400).json({ error: "Missing job_id for escrow checkout" });
         }
 
-        const globalStore = (global as any).jobStore || {};
-        const job = globalStore[job_id];
+        const job = StorageService.jobs[job_id];
 
         if (!job) {
             return res.status(404).json({ error: "Job not found" });
@@ -170,10 +167,8 @@ app.post("/delegate_payment", async (req, res) => {
     // Generate Payment Token (Ref ID)
     const paymentToken = `acp_mvx_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
-    // Store payload (In-memory for MVP)
-    // In Prod: await db.payments.create({ token: paymentToken, payload, status: 'pending' });
-    (global as any).paymentStore = (global as any).paymentStore || {};
-    (global as any).paymentStore[paymentToken] = payload;
+    // Store payload persistently
+    StorageService.setPayment(paymentToken, payload);
 
     res.json({ payment_token: paymentToken });
 });
@@ -185,8 +180,7 @@ app.post("/delegate_payment", async (req, res) => {
 app.post("/capture", async (req, res) => {
     const { payment_token } = req.body;
 
-    const store = (global as any).paymentStore || {};
-    const payload = store[payment_token];
+    const payload = StorageService.payments[payment_token];
 
     if (!payload) {
         return res.status(404).json({ error: "Invalid payment token" });
