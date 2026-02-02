@@ -2,10 +2,59 @@ import express from "express";
 import { fetchProducts } from "./logic/products";
 import { config } from "./utils/config";
 import { RelayerService, RelayedPayload } from "./logic/relayer";
+import { NegotiationService, RFP } from "./logic/negotiation";
+import { EscrowService } from "./logic/escrow";
 
 export const app = express();
 
 app.use(express.json());
+
+// In-memory Job Store for MVP
+const jobStore: Record<string, any> = {};
+
+/**
+ * 0. Negotiation Endpoint (ACP Phase 1)
+ * POST /negotiate
+ */
+app.post("/negotiate", async (req, res) => {
+    try {
+        const rfp = req.body as RFP;
+
+        // Basic Validation
+        if (!rfp.rfp_id || !rfp.client_id || !rfp.budget_limit) {
+            res.status(400).json({ error: "Missing required RFP fields" });
+            return;
+        }
+
+        const proposal = await NegotiationService.createProposal(rfp);
+
+        // Store Job
+        jobStore[proposal.job_id] = {
+            status: "NEGOTIATED",
+            rfp,
+            proposal
+        };
+
+        // Expose store globally for testing/other endpoints (MVP Hack)
+        (global as any).jobStore = jobStore;
+
+        res.json({
+            status: "accepted",
+            proposal,
+            poa_data: {
+                rfp_id: rfp.rfp_id,
+                job_id: proposal.job_id,
+                vendor: "erd1...", // TODO: Put actual vendor address here
+                client: rfp.client_id,
+                price: proposal.price,
+                token: proposal.token
+            }
+        });
+    } catch (error: any) {
+        console.error("Negotiation failed:", error);
+        res.status(500).json({ error: error.message || "Internal Server Error" });
+    }
+});
 
 /**
  * 1. Product Feed Endpoint
@@ -21,8 +70,50 @@ app.get("/.well-known/acp/products.json", async (req, res) => {
  * POST /checkout
  */
 app.post("/checkout", async (req, res) => {
-    const { product_id } = req.body;
+    const { product_id, job_id, type } = req.body;
 
+    // --- ESCROW FLOW (V2) ---
+    if (type === "escrow") {
+        if (!job_id) {
+            return res.status(400).json({ error: "Missing job_id for escrow checkout" });
+        }
+
+        const globalStore = (global as any).jobStore || {};
+        const job = globalStore[job_id];
+
+        if (!job) {
+            return res.status(404).json({ error: "Job not found" });
+        }
+
+        const proposal = job.proposal;
+
+        // Build Deposit Payload
+        const data = EscrowService.buildDepositPayload({
+            job_id: proposal.job_id,
+            token: proposal.token,
+            amount: proposal.price,
+            vendor: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu", // MVP: Params.vendor needs to be in Proposal or Config
+            poa_hash: "abcdef" // MVP: Should be derived from proposal.vendor_signature or re-hashing
+        });
+
+        // Configurable Escrow Address
+        const escrowAddress = config.escrow_address || "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu";
+
+        res.json({
+            status: "requires_action",
+            next_action: {
+                type: "sign_transaction",
+                chain_id: "D",
+                receiver: escrowAddress,
+                value: "0", // Access value from ESDTTransfer or direct EGLD
+                gasLimit: 20000000,
+                data: data
+            }
+        });
+        return;
+    }
+
+    // --- RETAIL FLOW (V1) ---
     if (!product_id) {
         return res.status(400).json({ error: "Missing product_id" });
     }

@@ -6,6 +6,7 @@ export interface Config {
     marketplace_address: string;
     default_token_id?: string;
     showcase_collection?: string;
+    escrow_address?: string;
 }
 
 const configPath = path.join(__dirname, "../config.json");
