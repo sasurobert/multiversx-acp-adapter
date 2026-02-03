@@ -35,6 +35,7 @@ app.post("/negotiate", async (req, res) => {
 
         // Store Job Persistently
         StorageService.setJob(proposal.job_id, {
+            id: proposal.job_id,
             status: "NEGOTIATED",
             rfp,
             proposal
@@ -86,7 +87,7 @@ app.post("/checkout", async (req, res) => {
             return res.status(404).json({ error: "Job not found" });
         }
 
-        const proposal = job.proposal;
+        const proposal = (job as any).proposal;
 
         // Build Deposit Payload
         const data = EscrowService.buildDepositPayload({
@@ -165,7 +166,11 @@ app.post("/delegate_payment", async (req, res) => {
     const paymentToken = `acp_mvx_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
     // Store payload persistently
-    StorageService.setPayment(paymentToken, payload);
+    StorageService.setPayment(paymentToken, {
+        token: paymentToken,
+        status: "pending",
+        ...payload
+    });
 
     res.json({ payment_token: paymentToken });
 });
@@ -184,7 +189,7 @@ app.post("/capture", async (req, res) => {
     }
 
     // Broadcast
-    const txHash = await RelayerService.broadcastRelayed(payload);
+    const txHash = await RelayerService.broadcastRelayed(payload as unknown as RelayedPayload);
 
     res.json({
         status: "processing",

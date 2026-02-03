@@ -12,7 +12,7 @@ describe("Storage Persistence Tests", () => {
 
     it("should persist and reload jobs across sessions", () => {
         const testJobId = "persistence-test-job-" + Date.now();
-        const testData = { status: "TESTING", value: "some-data" };
+        const testData = { id: testJobId, status: "TESTING", value: "some-data" };
 
         // 1. Set Job
         StorageService.setJob(testJobId, testData);
@@ -36,7 +36,7 @@ describe("Storage Persistence Tests", () => {
 
     it("should persist and reload payments across sessions", () => {
         const testToken = "persistence-test-token-" + Date.now();
-        const testPayload = { sender: "erd1...", signature: "sig" };
+        const testPayload = { token: testToken, status: "pending", sender: "erd1...", signature: "sig" };
 
         // 1. Set Payment
         StorageService.setPayment(testToken, testPayload);

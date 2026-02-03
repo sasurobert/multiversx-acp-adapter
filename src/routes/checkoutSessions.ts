@@ -131,7 +131,7 @@ checkoutSessionsRouter.post("/:id", async (req: Request, res: Response) => {
 
         const body = req.body as UpdateCheckoutSessionRequest;
 
-        const session = StorageService.getSession(id);
+        const session = StorageService.getSession<CheckoutSession>(id);
         if (!session) {
             const error: AcpError = {
                 code: "invalid_request",
@@ -186,7 +186,7 @@ checkoutSessionsRouter.get("/:id", async (req: Request, res: Response) => {
             return res.status(400).json(error);
         }
 
-        const session = StorageService.getSession(id);
+        const session = StorageService.getSession<CheckoutSession>(id);
         if (!session) {
             const error: AcpError = {
                 code: "invalid_request",
@@ -220,7 +220,7 @@ checkoutSessionsRouter.post("/:id/complete", async (req: Request, res: Response)
 
         const body = req.body as CompleteCheckoutSessionRequest;
 
-        const session = StorageService.getSession(id);
+        const session = StorageService.getSession<CheckoutSession>(id);
         if (!session) {
             const error: AcpError = {
                 code: "invalid_request",
@@ -300,7 +300,7 @@ checkoutSessionsRouter.post("/:id/cancel", async (req: Request, res: Response) =
             return res.status(400).json(error);
         }
 
-        const session = StorageService.getSession(id);
+        const session = StorageService.getSession<CheckoutSession>(id);
         if (!session) {
             const error: AcpError = {
                 code: "invalid_request",

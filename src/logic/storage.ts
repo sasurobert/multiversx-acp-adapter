@@ -1,15 +1,33 @@
 import fs from "fs";
 import path from "path";
 
+export interface JobData {
+    id: string;
+    status: string;
+    [key: string]: unknown;
+}
+
+export interface PaymentData {
+    token: string;
+    status: string;
+    [key: string]: unknown;
+}
+
+export interface SessionData {
+    id: string;
+    status: string;
+    [key: string]: unknown;
+}
+
 export class StorageService {
     private static storageDir = path.join(process.cwd(), "data");
     private static jobsFile = path.join(StorageService.storageDir, "jobs.json");
     private static paymentsFile = path.join(StorageService.storageDir, "payments.json");
     private static sessionsFile = path.join(StorageService.storageDir, "sessions.json");
 
-    static jobs: Record<string, any> = {};
-    static payments: Record<string, any> = {};
-    static sessions: Record<string, any> = {};
+    static jobs: Record<string, JobData> = {};
+    static payments: Record<string, PaymentData> = {};
+    static sessions: Record<string, SessionData> = {};
 
     /**
      * Initializes storage by ensuring data directory and loading existing JSON files.
@@ -63,7 +81,7 @@ export class StorageService {
     /**
      * Adds or updates a job and persists.
      */
-    static setJob(jobId: string, data: any) {
+    static setJob(jobId: string, data: JobData) {
         this.jobs[jobId] = data;
         this.save();
     }
@@ -71,7 +89,7 @@ export class StorageService {
     /**
      * Adds or updates a payment and persists.
      */
-    static setPayment(paymentToken: string, data: any) {
+    static setPayment(paymentToken: string, data: PaymentData) {
         this.payments[paymentToken] = data;
         this.save();
     }
@@ -79,15 +97,15 @@ export class StorageService {
     /**
      * Adds or updates a checkout session and persists.
      */
-    static setSession(sessionId: string, data: any) {
-        this.sessions[sessionId] = data;
+    static setSession<T extends { id: string; status: string }>(sessionId: string, data: T) {
+        this.sessions[sessionId] = data as unknown as SessionData;
         this.save();
     }
 
     /**
      * Gets a checkout session by ID.
      */
-    static getSession(sessionId: string): any | undefined {
-        return this.sessions[sessionId];
+    static getSession<T = SessionData>(sessionId: string): T | undefined {
+        return this.sessions[sessionId] as unknown as T;
     }
 }

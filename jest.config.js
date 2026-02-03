@@ -8,4 +8,7 @@ module.exports = {
     transformIgnorePatterns: [
         'node_modules/(?!(uuid)/)',
     ],
+    testPathIgnorePatterns: ["/node_modules/", "/dist/"],
+    collectCoverageFrom: ["src/**/*.ts", "!src/**/*.test.ts"],
+    coverageDirectory: "coverage",
 };

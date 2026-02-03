@@ -19,26 +19,49 @@ npm install
 npm run build
 ```
 
+## Configuration
+
+Copy `.env.example` to `.env` and configure:
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `MARKETPLACE_ADDRESS` | Smart Contract Address | Yes |
+| `VENDOR_ADDRESS` | Vendor Wallet Address | Yes |
+| `ESCROW_ADDRESS` | Escrow Contract Address | Yes |
+| `RELAYER_SECRET_KEY` | Hex Private Key for Relayer | Yes |
+| `VENDOR_SECRET_KEY` | Hex Private Key for Vendor POA | Yes |
+| `OPENAI_WEBHOOK_URL` | URL to send order events | No |
+| `OPENAI_WEBHOOK_SECRET` | Secret for HMAC signatures | No |
+| `API_URL` | MultiversX API (Default: devnet) | No |
+| `CHAIN_ID` | Chain ID (Default: D) | No |
+
 ## Usage
 
 Start the Adapter Service:
 ```bash
 # Runs on PORT 4000 by default
 npm start
+# OR for development
+npm run dev
 ```
 
 ### Endpoints
 
-| Method | Path | Description |
-| :--- | :--- | :--- |
-| `GET` | `/.well-known/acp/products.json` | Returns the list of discoverable products. |
-| `POST` | `/checkout` | Accepts `{ product_id }` and returns a transaction payload. |
-| `POST` | `/delegate_payment` | (V2) Accepts signed `multiversx_relayed` payload from Agent. |
-| `POST` | `/capture` | (V2) Broadcasts the relayed transaction to the blockchain. |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/.well-known/acp/products.json` | Product catalogue feed |
+| POST | `/checkout_sessions` | Create new checkout session |
+| POST | `/checkout_sessions/:id` | Update session (address/items) |
+| GET | `/checkout_sessions/:id` | Get session status |
+| POST | `/checkout_sessions/:id/complete` | Finalize session & payment |
+| POST | `/checkout_sessions/:id/cancel` | Cancel session |
+| POST | `/delegate_payment` | Relay gasless transaction (Agent) |
+| POST | `/capture` | Broadcast captured payment (Merchant) |
 
 ## Testing
 
 Run the integration tests to verify compliance with the ACP spec:
 ```bash
 npm test
+npm run test:coverage
 ```

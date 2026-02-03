@@ -1,7 +1,7 @@
 import { RelayerService } from "../logic/relayer";
 import { Mnemonic, UserSigner } from "@multiversx/sdk-wallet";
 import { Transaction, Address, TransactionComputer } from "@multiversx/sdk-core";
-import { config } from "../utils/config";
+import { env } from "../utils/environment";
 
 // --- LIVE DEMO Script ---
 // Run with: TEST_MODE=false CHAIN_ID=D ts-node src/scripts/demo_relayer.ts
@@ -24,7 +24,7 @@ async function runLiveDemo() {
     const userSigner = new UserSigner(userKey);
 
     console.log(`👤 Agent: ${userAddress.bech32()}`);
-    console.log(`📡 Relayer: ${new Address(config.marketplace_address || "erd1...").toBech32()}`); // Config or derived
+    console.log(`📡 Relayer: ${new Address(env.MARKETPLACE_ADDRESS || "erd1...").toBech32()}`); // Config or derived
 
     // 3. Construct Transaction
     const coreUserAddress = new Address(userAddress.bech32());
@@ -34,8 +34,8 @@ async function runLiveDemo() {
         receiver: coreUserAddress, // Send to self
         sender: coreUserAddress,
         gasLimit: 60000000n,
-        chainID: config.chain_id,
-        relayer: new Address(process.env.RELAYER_ADDRESS || config.marketplace_address || "erd1..."),
+        chainID: env.CHAIN_ID,
+        relayer: new Address(process.env.RELAYER_ADDRESS || env.MARKETPLACE_ADDRESS || "erd1..."),
         data: Buffer.from("demo_relayed_tx")
     });
 

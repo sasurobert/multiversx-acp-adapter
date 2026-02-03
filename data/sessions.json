@@ -1,6 +1,6 @@
 {
-  "checkout_session_58695c12-ee8c-466f-8b76-3e7331657be6": {
-    "id": "checkout_session_58695c12-ee8c-466f-8b76-3e7331657be6",
+  "checkout_session_92cee600-8c6c-4a9a-9b3c-319215244ed3": {
+    "id": "checkout_session_92cee600-8c6c-4a9a-9b3c-319215244ed3",
     "status": "completed",
     "currency": "usd",
     "line_items": [
@@ -63,6 +63,6 @@
         "url": "https://multiversx.com/terms"
       }
     ],
-    "order_id": "order_783a3313-0e3c-4dca-8691-09482a111cc6"
+    "order_id": "order_1a259148-2887-4b10-ae3b-090939c6c7e6"
   }
 }

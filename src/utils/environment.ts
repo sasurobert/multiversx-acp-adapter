@@ -37,7 +37,7 @@ function validateEnv(): Environment {
 
     // Load defaults from config.json if Env Vars are missing (backward compatibility, optional)
     // For production readiness, we prefer Env Vars override everything.
-    let jsonConfig: any = {};
+    let jsonConfig: Record<string, string | undefined> = {};
     try {
         const configPath = path.join(__dirname, "../config.json");
         if (fs.existsSync(configPath)) {
