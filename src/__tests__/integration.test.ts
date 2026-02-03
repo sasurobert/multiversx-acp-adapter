@@ -17,10 +17,12 @@ jest.mock("../logic/products", () => ({
     ])
 }));
 
-jest.mock("../utils/config", () => ({
-    config: {
-        marketplace_address: "erd1mockaddress",
-        api_url: "http://mock-api"
+jest.mock("../utils/environment", () => ({
+    env: {
+        MARKETPLACE_ADDRESS: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu",
+        API_URL: "http://mock-api",
+        CHAIN_ID: "D",
+        GAS_LIMIT: 60000000
     }
 }));
 
@@ -43,7 +45,7 @@ describe("ACP Adapter Integration Tests", () => {
 
             expect(res.status).toBe(200);
             expect(res.body.status).toBe("requires_action");
-            expect(res.body.next_action.dapp_url).toContain("receiver=erd1mockaddress");
+            expect(res.body.next_action.dapp_url).toContain("receiver=erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu");
         });
 
         it("should return 404 for invalid product", async () => {

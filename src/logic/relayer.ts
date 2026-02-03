@@ -1,6 +1,7 @@
 import { UserVerifier, UserPublicKey, UserSigner, UserSecretKey } from "@multiversx/sdk-wallet";
 import { Address, Transaction, TransactionComputer } from "@multiversx/sdk-core";
-import { config } from "../utils/config";
+import { ProxyNetworkProvider } from "@multiversx/sdk-network-providers";
+import { env } from "../utils/environment";
 
 export interface RelayedPayload {
     sender: string;
@@ -18,25 +19,17 @@ export class RelayerService {
      * intended to be relayed by US (the Adapter).
      */
     static verifySignature(payload: RelayedPayload): boolean {
-        // We cannot just verify the data hash if it's a Relayed V3.
-        // We must verify the Transaction Signature itself.
-        // Reconstruction:
         try {
             // Relayer Address assumed to be this Adapter's configured address
-            // The Agent must have signed it with THIS address as the 'relayer'.
-            // If config.escrow_address is used as placeholder, fine.
-            // But ideally we have a dedicated Relayer Address.
-            // For MVP: Use same address or config.marketplace_address
-            // Use a specific Relayer Env Var fallback
-            const relayerAddrStr = process.env.RELAYER_ADDRESS || config.marketplace_address;
+            const relayerAddrStr = env.MARKETPLACE_ADDRESS; // Or dedicated env.RELAYER_ADDRESS if added
 
             const tx = new Transaction({
                 nonce: BigInt(payload.nonce),
                 value: BigInt(payload.value),
                 receiver: new Address(payload.receiver),
                 sender: new Address(payload.sender),
-                gasLimit: 60000000n, // MVP: Loose limit, or we need it in payload? Spec misses GasLimit.
-                chainID: "D", // TODO: Configurable
+                gasLimit: BigInt(env.GAS_LIMIT),
+                chainID: env.CHAIN_ID,
                 data: payload.data ? Buffer.from(payload.data, 'base64') : undefined,
                 relayer: new Address(relayerAddrStr)
             });
@@ -62,11 +55,7 @@ export class RelayerService {
      * and signs it with the Adapter's private key.
      */
     static async packRelayedTransaction(payload: RelayedPayload): Promise<Transaction> {
-        if (!process.env.RELAYER_SECRET_KEY) {
-            throw new Error("Missing RELAYER_SECRET_KEY");
-        }
-
-        const relayerKey = UserSecretKey.fromString(process.env.RELAYER_SECRET_KEY);
+        const relayerKey = UserSecretKey.fromString(env.RELAYER_SECRET_KEY);
         // relayerKey.generatePublicKey().toAddress() returns UserAddress (sdk-wallet)
         const relayerUserCert = relayerKey.generatePublicKey().toAddress();
         // Convert to sdk-core Address implicitly via bech32 string
@@ -78,8 +67,8 @@ export class RelayerService {
             value: BigInt(payload.value),
             receiver: new Address(payload.receiver),
             sender: new Address(payload.sender),
-            gasLimit: 60000000n, // Matching verify
-            chainID: "D",
+            gasLimit: BigInt(env.GAS_LIMIT),
+            chainID: env.CHAIN_ID,
             data: payload.data ? Buffer.from(payload.data, 'base64') : undefined,
             relayer: relayerAddress
         });
@@ -88,30 +77,9 @@ export class RelayerService {
         tx.signature = Buffer.from(payload.signature, 'hex');
 
         // Sign as Relayer
-        // In SDK Core v13/14+, Transaction object has 'applyRelayerSignature' or similar?
-        // Or we just set 'relayerSignature' property if accessible?
-
-        // Use Signer
         const signer = new UserSigner(relayerKey);
-        // Signing a Relayed Tx basically signs the already-signed object again?
-        // MultiversX Relayed V3 signing flow: 
-        // 1. SerializeForSigning (includes sender sig?) No, Relayer signs the tx content + sender sig?
-        // Let's check SDK docs or standard.
-        // Actually, for Relayed V3, the Relayer signs the whole Transaction object (which includes Sender Signature).
-
-        // Ideally: tx.sign(signer) might overwrite? No.
-        // We need to generate the signature for the Relayer.
-        // The serializable part for relayer includes the sender's signature?
-        // SDK Core usually handles this if built correctly.
-
-        // Let's assume standard behavior:
-        // tx.relayerSignature = await signer.sign(tx.serializeForSigning());
-        // BUT verify first if serializeForSigning includes sender signature when relayer is present.
-        // Assuming SDK handles it.
 
         // Compute bytes for Relayer Signing
-        // In v15, computeBytesForSigning handles the logic if relayer is set?
-        // It should include the sender's signature.
         const computer = new TransactionComputer();
         const bytesToSign = computer.computeBytesForSigning(tx);
 
@@ -131,15 +99,8 @@ export class RelayerService {
         try {
             const tx = await this.packRelayedTransaction(payload);
 
-            // If in Test Mode, mock the hash
-            if (process.env.TEST_MODE === "true") {
-                console.log("[Relayer] Test Mode: Broadcasting mocked.");
-                return "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
-            }
-
             // Real Broadcast
-            const { ProxyNetworkProvider } = require("@multiversx/sdk-network-providers");
-            const provider = new ProxyNetworkProvider(config.api_url);
+            const provider = new ProxyNetworkProvider(env.API_URL);
 
             const hash = await provider.sendTransaction(tx);
             console.log(`[Relayer] Transaction sent: ${hash}`);

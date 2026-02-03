@@ -1,5 +1,5 @@
 import axios from "axios";
-import { config } from "../utils/config";
+import { env } from "../utils/environment";
 
 export interface AcpProduct {
     product_id: string;
@@ -19,14 +19,14 @@ export interface AcpProduct {
 export async function fetchProducts(): Promise<AcpProduct[]> {
     try {
         const params: any = { size: 10 };
-        if (config.showcase_collection) {
-            params.collection = config.showcase_collection;
+        if (env.SHOWCASE_COLLECTION) {
+            params.collection = env.SHOWCASE_COLLECTION;
         } else {
             // Fallback: fetch recent NFTs if no collection specified
             // or ensure we get at least something valid
         }
 
-        const url = `${config.api_url}/nfts`;
+        const url = `${env.API_URL}/nfts`;
         const response = await axios.get(url, { params });
         const items = response.data;
 

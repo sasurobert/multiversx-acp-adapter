@@ -1,22 +1,27 @@
 import { RelayerService } from "../logic/relayer";
 import { Transaction, Address, TransactionComputer } from "@multiversx/sdk-core";
 import { Mnemonic, UserSigner } from "@multiversx/sdk-wallet";
+import { env } from "../utils/environment";
+
+jest.mock("../utils/environment", () => ({
+    env: {
+        MARKETPLACE_ADDRESS: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu",
+        API_URL: "https://devnet-api.multiversx.com",
+        CHAIN_ID: "D",
+        GAS_LIMIT: 60000000,
+        RELAYER_SECRET_KEY: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+    }
+}));
 
 describe("RelayerService", () => {
-    // Adapter / Relayer Key
-    const relayerMnemonic = Mnemonic.generate();
-    const relayerKey = relayerMnemonic.deriveKey(0);
-    const relayerAddress = relayerKey.generatePublicKey().toAddress().bech32();
+    // Adapter / Relayer Key (Mocked from ENV)
+    const relayerAddress = env.MARKETPLACE_ADDRESS;
 
     // User / Agent Key
     const userMnemonic = Mnemonic.generate();
     const userKey = userMnemonic.deriveKey(0);
     const userAddress = userKey.generatePublicKey().toAddress().bech32();
     const userSigner = new UserSigner(userKey);
-
-    beforeAll(() => {
-        // Build payload signed by User, targeting Relayer
-    });
 
     it("should pack and sign a Relayed V3 transaction", async () => {
         // 1. User constructs Inner Transaction
@@ -26,10 +31,10 @@ describe("RelayerService", () => {
             value: 1000000000000000000n, // 1 EGLD
             receiver: new Address("erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu"),
             sender: new Address(userAddress),
-            gasLimit: 60000000n,
-            chainID: "D",
+            gasLimit: BigInt(env.GAS_LIMIT),
+            chainID: env.CHAIN_ID,
             relayer: new Address(relayerAddress),
-            data: Buffer.from("hello") // Try passing Buffer directly
+            data: Buffer.from("hello")
         });
 
         // Sign as User
@@ -41,15 +46,16 @@ describe("RelayerService", () => {
         const payload = {
             sender: userAddress,
             receiver: innerTx.receiver.toBech32(),
-            nonce: Number(innerTx.nonce), // Payload uses number
+            nonce: Number(innerTx.nonce),
             value: innerTx.value.toString(),
             data: Buffer.from(innerTx.data).toString("base64"),
             signature: Buffer.from(innerTx.signature).toString("hex"),
         };
 
         // 3. Adapter packs it
-        process.env.RELAYER_SECRET_KEY = relayerKey.hex();
-        process.env.RELAYER_ADDRESS = relayerAddress;
+        // We must ensure the RELAYER_SECRET_KEY in env is valid for signing
+        // For the test, we might need to overwrite it if we want to verify the signature later,
+        // but RelayerService.packRelayedTransaction uses env.RELAYER_SECRET_KEY.
 
         // Verify First
         const isValid = RelayerService.verifySignature(payload);
@@ -58,9 +64,7 @@ describe("RelayerService", () => {
         const relayedTx = await RelayerService.packRelayedTransaction(payload);
 
         expect(relayedTx).toBeDefined();
-        // Expect Relayer Signature
         expect(relayedTx.signature.length).toBeGreaterThan(0);
-        // relayerSignature property check
         expect(relayedTx.relayerSignature).toBeDefined();
         expect(relayedTx.relayerSignature.length).toBeGreaterThan(0);
     });

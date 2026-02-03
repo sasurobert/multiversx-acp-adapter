@@ -1,15 +1,25 @@
 import request from "supertest";
 import { app } from "../app";
 import { Mnemonic } from "@multiversx/sdk-wallet";
+import { env } from "../utils/environment";
+
+jest.mock("../utils/environment", () => ({
+    env: {
+        VENDOR_ADDRESS: "erd1h3wp7ecggy3yyvwppehr0pa3htssd887dkykxgvwxyh9paz7gacsfcm0rt",
+        ESCROW_ADDRESS: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu",
+        MARKETPLACE_ADDRESS: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu",
+        CHAIN_ID: "D",
+        GAS_LIMIT: 60000000,
+        VENDOR_SECRET_KEY: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+    }
+}));
 
 describe("App Integration Tests", () => {
 
-    // Setup Vendor Key
-    const mnemonic = Mnemonic.generate();
-    const vendorKey = mnemonic.deriveKey(0);
-
     beforeAll(() => {
-        process.env.VENDOR_SECRET_KEY = vendorKey.hex();
+        // process.env values are less important now that we mock env, 
+        // but we keep them for any other direct access.
+        process.env.VENDOR_SECRET_KEY = "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
         process.env.TEST_MODE = "true";
     });
 

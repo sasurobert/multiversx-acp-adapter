@@ -3,12 +3,27 @@ import { app } from "../app";
 import { Mnemonic, UserSigner } from "@multiversx/sdk-wallet";
 import { Transaction, Address, TransactionComputer } from "@multiversx/sdk-core";
 import { RelayerService } from "../logic/relayer";
+import { env } from "../utils/environment";
+
+jest.mock("../utils/environment", () => ({
+    env: {
+        MARKETPLACE_ADDRESS: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu",
+        API_URL: "https://devnet-api.multiversx.com",
+        CHAIN_ID: "D",
+        GAS_LIMIT: 60000000,
+        RELAYER_SECRET_KEY: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+    }
+}));
+
+jest.mock("@multiversx/sdk-network-providers", () => ({
+    ProxyNetworkProvider: jest.fn().mockImplementation(() => ({
+        sendTransaction: jest.fn().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12")
+    }))
+}));
 
 describe("Relayed Payment Integration (V2)", () => {
-    // Relayer (Adapter) Key - Must match what the App uses or we mock env
-    const relayerMnemonic = Mnemonic.generate();
-    const relayerKey = relayerMnemonic.deriveKey(0);
-    const relayerAddress = relayerKey.generatePublicKey().toAddress().bech32();
+    // Relayer (Adapter) Key - Must match mock
+    const relayerAddress = "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu";
 
     // User (Agent) Key
     const userMnemonic = Mnemonic.generate();
@@ -17,9 +32,7 @@ describe("Relayed Payment Integration (V2)", () => {
     const userSigner = new UserSigner(userKey);
 
     beforeAll(() => {
-        process.env.RELAYER_SECRET_KEY = relayerKey.hex();
-        process.env.RELAYER_ADDRESS = relayerAddress;
-        process.env.TEST_MODE = "true"; // Start with mock mode for safety
+        process.env.TEST_MODE = "true";
     });
 
     it("should process a full delegated payment flow", async () => {

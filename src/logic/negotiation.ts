@@ -1,6 +1,6 @@
+import { env } from "../utils/environment";
 import { UserSigner, UserSecretKey } from "@multiversx/sdk-wallet";
 import * as crypto from "crypto";
-import { Address } from "@multiversx/sdk-core";
 
 export interface RFP {
     rfp_id: string;
@@ -28,10 +28,8 @@ export class NegotiationService {
      * 3. Signs the Agreement (PoA) hash.
      */
     static async createProposal(rfp: RFP): Promise<Proposal> {
-        if (!process.env.VENDOR_SECRET_KEY) {
-            throw new Error("Missing VENDOR_SECRET_KEY");
-        }
-
+        const secretKey = UserSecretKey.fromString(env.VENDOR_SECRET_KEY);
+        const signer = new UserSigner(secretKey);
         const jobId = crypto.randomUUID();
         // MVP Logic: Accept budget 1:1
         const price = rfp.budget_limit;
@@ -41,8 +39,6 @@ export class NegotiationService {
         // Construct PoA Data to sign
         // Format: sha256(job_id + client + vendor + token + amount + deadline)
         // We need the Vendor Address to include in the hash match.
-        const secretKey = UserSecretKey.fromString(process.env.VENDOR_SECRET_KEY);
-        const signer = new UserSigner(secretKey);
         const vendorAddress = secretKey.generatePublicKey().toAddress().bech32();
 
         const dataToSign = `${jobId}${rfp.client_id}${vendorAddress}${token}${price}${deadline}`;

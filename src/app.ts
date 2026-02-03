@@ -1,6 +1,6 @@
 import express from "express";
 import { fetchProducts } from "./logic/products";
-import { config } from "./utils/config";
+import { env } from "./utils/environment";
 import { RelayerService, RelayedPayload } from "./logic/relayer";
 import { NegotiationService, RFP } from "./logic/negotiation";
 import { EscrowService } from "./logic/escrow";
@@ -42,15 +42,15 @@ app.post("/negotiate", async (req, res) => {
             poa_data: {
                 rfp_id: rfp.rfp_id,
                 job_id: proposal.job_id,
-                vendor: "erd1...", // TODO: Put actual vendor address here
+                vendor: env.VENDOR_ADDRESS,
                 client: rfp.client_id,
                 price: proposal.price,
                 token: proposal.token
             }
         });
-    } catch (error: any) {
+    } catch (error) {
         console.error("Negotiation failed:", error);
-        res.status(500).json({ error: error.message || "Internal Server Error" });
+        res.status(500).json({ error: error instanceof Error ? error.message : "Internal Server Error" });
     }
 });
 
@@ -89,21 +89,18 @@ app.post("/checkout", async (req, res) => {
             job_id: proposal.job_id,
             token: proposal.token,
             amount: proposal.price,
-            vendor: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu", // MVP: Params.vendor needs to be in Proposal or Config
-            poa_hash: "abcdef" // MVP: Should be derived from proposal.vendor_signature or re-hashing
+            vendor: env.VENDOR_ADDRESS,
+            poa_hash: proposal.vendor_signature.slice(0, 64) // Using signature prefix or a proper hash as PoA
         });
-
-        // Configurable Escrow Address
-        const escrowAddress = config.escrow_address || "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu";
 
         res.json({
             status: "requires_action",
             next_action: {
                 type: "sign_transaction",
-                chain_id: "D",
-                receiver: escrowAddress,
+                chain_id: env.CHAIN_ID,
+                receiver: env.ESCROW_ADDRESS,
                 value: "0", // Access value from ESDTTransfer or direct EGLD
-                gasLimit: 20000000,
+                gasLimit: env.GAS_LIMIT,
                 data: data
             }
         });
@@ -132,7 +129,7 @@ app.post("/checkout", async (req, res) => {
     const data = `buy@${tokenHex}@${nonceEven}@${quantityHex}`;
 
     // USE CONFIGURABLE ADDRESS
-    const dAppUrl = `https://wallet.multiversx.com/hook/sign?data=${data}&receiver=${config.marketplace_address}`;
+    const dAppUrl = `https://wallet.multiversx.com/hook/sign?data=${data}&receiver=${env.MARKETPLACE_ADDRESS}`;
 
     // Return ACP-compliant "Action"
     res.json({
@@ -154,14 +151,10 @@ app.post("/delegate_payment", async (req, res) => {
     const payload = req.body as RelayedPayload;
 
     // Validate Signature
-    // Note: In this MVP/Demo, verification might fail if we don't have a real signature.
-    // We'll allow a "skip_verification" flag for testing if needed, or enforce it.
-    // For Safety: We log verification result but proceed if it's a mock.
     const isValid = RelayerService.verifySignature(payload);
 
-    if (!isValid && !process.env.TEST_MODE) {
-        // In Prod, uncomment: return res.status(401).json({ error: "Invalid Signature" });
-        console.warn("Signature verification failed (ignoring for Demo)");
+    if (!isValid) {
+        return res.status(401).json({ error: "Invalid Signature" });
     }
 
     // Generate Payment Token (Ref ID)
