@@ -16,6 +16,8 @@ export interface Environment {
     GAS_LIMIT: number;
     SHOWCASE_COLLECTION?: string;
     DEFAULT_TOKEN_ID?: string;
+    OPENAI_WEBHOOK_URL?: string;
+    OPENAI_WEBHOOK_SECRET?: string;
     ENV: "test" | "dev" | "prod";
 }
 
@@ -57,6 +59,8 @@ function validateEnv(): Environment {
         GAS_LIMIT: parseInt(process.env.GAS_LIMIT || jsonConfig.gas_limit || "60000000"),
         SHOWCASE_COLLECTION: process.env.SHOWCASE_COLLECTION || jsonConfig.showcase_collection,
         DEFAULT_TOKEN_ID: process.env.DEFAULT_TOKEN_ID || jsonConfig.default_token_id,
+        OPENAI_WEBHOOK_URL: process.env.OPENAI_WEBHOOK_URL,
+        OPENAI_WEBHOOK_SECRET: process.env.OPENAI_WEBHOOK_SECRET,
         ENV: (process.env.NODE_ENV as any) || "dev"
     };
 }

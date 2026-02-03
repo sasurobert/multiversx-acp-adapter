@@ -5,6 +5,7 @@ import { RelayerService, RelayedPayload } from "./logic/relayer";
 import { NegotiationService, RFP } from "./logic/negotiation";
 import { EscrowService } from "./logic/escrow";
 import { StorageService } from "./logic/storage";
+import { checkoutSessionsRouter } from "./routes/checkoutSessions";
 
 export const app = express();
 
@@ -12,6 +13,9 @@ app.use(express.json());
 
 // Initialize Storage
 StorageService.init();
+
+// Mount ACP-compliant checkout sessions routes
+app.use("/checkout_sessions", checkoutSessionsRouter);
 
 /**
  * 0. Negotiation Endpoint (ACP Phase 1)

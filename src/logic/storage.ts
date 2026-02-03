@@ -5,9 +5,11 @@ export class StorageService {
     private static storageDir = path.join(process.cwd(), "data");
     private static jobsFile = path.join(StorageService.storageDir, "jobs.json");
     private static paymentsFile = path.join(StorageService.storageDir, "payments.json");
+    private static sessionsFile = path.join(StorageService.storageDir, "sessions.json");
 
     static jobs: Record<string, any> = {};
     static payments: Record<string, any> = {};
+    static sessions: Record<string, any> = {};
 
     /**
      * Initializes storage by ensuring data directory and loading existing JSON files.
@@ -34,6 +36,15 @@ export class StorageService {
                 this.payments = {};
             }
         }
+
+        if (fs.existsSync(this.sessionsFile)) {
+            try {
+                this.sessions = JSON.parse(fs.readFileSync(this.sessionsFile, "utf-8"));
+            } catch (e) {
+                console.error("Failed to load sessions storage:", e);
+                this.sessions = {};
+            }
+        }
     }
 
     /**
@@ -43,6 +54,7 @@ export class StorageService {
         try {
             fs.writeFileSync(this.jobsFile, JSON.stringify(this.jobs, null, 2));
             fs.writeFileSync(this.paymentsFile, JSON.stringify(this.payments, null, 2));
+            fs.writeFileSync(this.sessionsFile, JSON.stringify(this.sessions, null, 2));
         } catch (e) {
             console.error("Failed to save storage:", e);
         }
@@ -62,5 +74,20 @@ export class StorageService {
     static setPayment(paymentToken: string, data: any) {
         this.payments[paymentToken] = data;
         this.save();
+    }
+
+    /**
+     * Adds or updates a checkout session and persists.
+     */
+    static setSession(sessionId: string, data: any) {
+        this.sessions[sessionId] = data;
+        this.save();
+    }
+
+    /**
+     * Gets a checkout session by ID.
+     */
+    static getSession(sessionId: string): any | undefined {
+        return this.sessions[sessionId];
     }
 }

@@ -358,5 +358,41 @@
       "deadline_block": 6000,
       "vendor_signature": "4a842e217aa696ba02a357e5a5ef6b2572cf6e828a6839c6170f25c6006186eb0fdcd921c33446696c0cc980251a8bd3df0d25ff5f6477f7fccff9604c597b00"
     }
+  },
+  "8f452003-424e-4850-9f87-bdb2096d2f97": {
+    "status": "NEGOTIATED",
+    "rfp": {
+      "rfp_id": "rfp-integration-test",
+      "client_id": "erd1client...",
+      "task_description": "Integration Test Task",
+      "budget_limit": "1000000",
+      "token_identifier": "USDC-c76f1f",
+      "deadline_block": 5000
+    },
+    "proposal": {
+      "job_id": "8f452003-424e-4850-9f87-bdb2096d2f97",
+      "price": "1000000",
+      "token": "USDC-c76f1f",
+      "deadline_block": 5000,
+      "vendor_signature": "08fa9af66c9982fbb1908685bc3881a7af052b8adc4a9dd00057946480d7b17e1519cad206f3ccaa9e7d74c60538a4913ebc2ba01b5875bbc2861e06ca87af0f"
+    }
+  },
+  "0df63c82-00e4-402b-b68b-39d0731d56d0": {
+    "status": "NEGOTIATED",
+    "rfp": {
+      "rfp_id": "rfp-flow-test",
+      "client_id": "erd1client...",
+      "task_description": "Flow Test",
+      "budget_limit": "5000",
+      "token_identifier": "EGLD",
+      "deadline_block": 6000
+    },
+    "proposal": {
+      "job_id": "0df63c82-00e4-402b-b68b-39d0731d56d0",
+      "price": "5000",
+      "token": "EGLD",
+      "deadline_block": 6000,
+      "vendor_signature": "6e2e7a32b8df3d43cf60467dd8c840a29605987cdcf0ecb42431a738353aa0e597976bbe78167458078cf87f402e369da883c8807992f5d72ae07b6279130c00"
+    }
   }
 }

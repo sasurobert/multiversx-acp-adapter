@@ -1,0 +1,68 @@
+{
+  "checkout_session_58695c12-ee8c-466f-8b76-3e7331657be6": {
+    "id": "checkout_session_58695c12-ee8c-466f-8b76-3e7331657be6",
+    "status": "completed",
+    "currency": "usd",
+    "line_items": [
+      {
+        "id": "line_item_0",
+        "item": {
+          "id": "product_123",
+          "quantity": 1
+        },
+        "base_amount": 1000,
+        "discount": 0,
+        "subtotal": 1000,
+        "tax": 100,
+        "total": 1100
+      }
+    ],
+    "totals": [
+      {
+        "type": "items_base_amount",
+        "display_text": "Item(s) total",
+        "amount": 1000
+      },
+      {
+        "type": "subtotal",
+        "display_text": "Subtotal",
+        "amount": 1000
+      },
+      {
+        "type": "tax",
+        "display_text": "Tax",
+        "amount": 100
+      },
+      {
+        "type": "total",
+        "display_text": "Total",
+        "amount": 1100
+      }
+    ],
+    "fulfillment_address": {
+      "name": "John Doe",
+      "line_one": "123 Main St",
+      "city": "San Francisco",
+      "state": "CA",
+      "country": "US",
+      "postal_code": "94102"
+    },
+    "payment_provider": {
+      "provider": "multiversx",
+      "supported_payment_methods": [
+        "crypto_wallet"
+      ]
+    },
+    "buyer": {
+      "name": "John Doe",
+      "email": "john@example.com"
+    },
+    "links": [
+      {
+        "type": "terms_of_use",
+        "url": "https://multiversx.com/terms"
+      }
+    ],
+    "order_id": "order_783a3313-0e3c-4dca-8691-09482a111cc6"
+  }
+}
