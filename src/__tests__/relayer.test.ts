@@ -1,7 +1,7 @@
 import { describe, it, expect, jest } from "@jest/globals";
 import { RelayerService } from "../logic/relayer";
-import { Transaction, Address, TransactionComputer } from "@multiversx/sdk-core";
-import { Mnemonic, UserSigner } from "@multiversx/sdk-wallet";
+import { Transaction, Address, TransactionComputer, AddressComputer } from "@multiversx/sdk-core";
+import { Mnemonic, UserSigner, UserSecretKey } from "@multiversx/sdk-wallet";
 import { env } from "../utils/environment";
 
 jest.mock("../utils/environment", () => ({
@@ -10,31 +10,56 @@ jest.mock("../utils/environment", () => ({
         API_URL: "https://devnet-api.multiversx.com",
         CHAIN_ID: "D",
         GAS_LIMIT: 60000000,
-        RELAYER_SECRET_KEY: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+        // Mock 32-byte hex keys for each shard
+        RELAYER_SECRET_KEY_SHARD_0: "0000000000000000000000000000000000000000000000000000000000000000",
+        RELAYER_SECRET_KEY_SHARD_1: "1111111111111111111111111111111111111111111111111111111111111111",
+        RELAYER_SECRET_KEY_SHARD_2: "2222222222222222222222222222222222222222222222222222222222222222"
     }
 }));
 
 describe("RelayerService", () => {
-    // Adapter / Relayer Key (Mocked from ENV)
-    const relayerAddress = env.MARKETPLACE_ADDRESS;
 
-    // User / Agent Key
-    const userMnemonic = Mnemonic.generate();
-    const userKey = userMnemonic.deriveKey(0);
-    const userAddress = userKey.generatePublicKey().toAddress().bech32();
-    const userSigner = new UserSigner(userKey);
+    // Helper: Find a user in a specific shard
+    const findUserInShard = (targetShard: number) => {
+        const computer = new AddressComputer();
+        let attempts = 0;
+        while (attempts < 1000) {
+            const mnemonic = Mnemonic.generate();
+            const key = mnemonic.deriveKey(0);
+            const addressBech32 = key.generatePublicKey().toAddress().bech32();
+            const addressObj = new Address(addressBech32);
+            if (computer.getShardOfAddress(addressObj) === targetShard) {
+                return { mnemonic, address: addressBech32, key };
+            }
+            attempts++;
+        }
+        throw new Error(`Could not find address in shard ${targetShard}`);
+    };
+
+    // Helper: Derive address from hex key
+    const getAddressFromKey = (hexKey: string) => {
+        const key = UserSecretKey.fromString(hexKey);
+        return key.generatePublicKey().toAddress().bech32();
+    };
 
     it("should pack and sign a Relayed V3 transaction", async () => {
+        // Use a Shard 1 user
+        const user = findUserInShard(1);
+        const userSigner = new UserSigner(user.key);
+
+        // Expected Relayer for Shard 1
+        const relayer1Address = getAddressFromKey("1111111111111111111111111111111111111111111111111111111111111111");
+
         // 1. User constructs Inner Transaction
-        // NOTE: In V3, User must sign with 'relayer' field set to Adapter's address
+        // NOTE: In V3, User must sign with 'relayer' field set to the CORRECT Relayer address for their shard
         const innerTx = new Transaction({
             nonce: 10n,
             value: 1000000000000000000n, // 1 EGLD
             receiver: new Address("erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu"),
-            sender: new Address(userAddress),
+            sender: new Address(user.address),
             gasLimit: BigInt(env.GAS_LIMIT),
             chainID: env.CHAIN_ID,
-            relayer: new Address(relayerAddress),
+            relayer: new Address(relayer1Address),
             data: Buffer.from("hello")
         });
 
@@ -45,7 +70,7 @@ describe("RelayerService", () => {
 
         // 2. Prepare Payload (what the API receives)
         const payload = {
-            sender: userAddress,
+            sender: user.address,
             receiver: innerTx.receiver.toBech32(),
             nonce: Number(innerTx.nonce),
             value: innerTx.value.toString(),
@@ -54,10 +79,6 @@ describe("RelayerService", () => {
         };
 
         // 3. Adapter packs it
-        // We must ensure the RELAYER_SECRET_KEY in env is valid for signing
-        // For the test, we might need to overwrite it if we want to verify the signature later,
-        // but RelayerService.packRelayedTransaction uses env.RELAYER_SECRET_KEY.
-
         // Verify First
         const isValid = RelayerService.verifySignature(payload);
         expect(isValid).toBe(true);
@@ -65,6 +86,8 @@ describe("RelayerService", () => {
         const relayedTx = await RelayerService.packRelayedTransaction(payload);
 
         expect(relayedTx).toBeDefined();
+        // Check that the relayer address in the packed tx matches what we expect
+        expect(relayedTx.relayer.toBech32()).toBe(relayer1Address);
         expect(relayedTx.signature.length).toBeGreaterThan(0);
         expect(relayedTx.relayerSignature).toBeDefined();
         expect(relayedTx.relayerSignature.length).toBeGreaterThan(0);

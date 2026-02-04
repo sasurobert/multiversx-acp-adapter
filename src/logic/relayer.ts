@@ -1,5 +1,5 @@
 import { UserVerifier, UserPublicKey, UserSigner, UserSecretKey } from "@multiversx/sdk-wallet";
-import { Address, Transaction, TransactionComputer } from "@multiversx/sdk-core";
+import { Address, Transaction, TransactionComputer, AddressComputer } from "@multiversx/sdk-core";
 import { ProxyNetworkProvider } from "@multiversx/sdk-network-providers";
 import { logger } from "../utils/logger";
 import { env } from "../utils/environment";
@@ -16,13 +16,55 @@ export interface RelayedPayload {
 export class RelayerService {
 
     /**
+     * Determines the correct Relayer Address for a given client address
+     * based on shard affinity (Source Shard = Relayer Shard).
+     */
+    static getRelayerAddress(clientAddress: string): string {
+        const address = new Address(clientAddress);
+        const computer = new AddressComputer();
+        const shard = computer.getShardOfAddress(address);
+
+        let secretKeyStr = "";
+        switch (shard) {
+            case 0: secretKeyStr = env.RELAYER_SECRET_KEY_SHARD_0; break;
+            case 1: secretKeyStr = env.RELAYER_SECRET_KEY_SHARD_1; break;
+            case 2: secretKeyStr = env.RELAYER_SECRET_KEY_SHARD_2; break;
+            default: secretKeyStr = env.RELAYER_SECRET_KEY_SHARD_0; break; // Fallback or Error
+        }
+
+        // Derive Address from Key
+        const key = UserSecretKey.fromString(secretKeyStr);
+        return key.generatePublicKey().toAddress().bech32();
+    }
+
+    /**
+     * Helper to get the Signer (Secret Key) for the Relayer responsible for this client.
+     */
+    private static getRelayerSigner(clientAddress: string): UserSigner {
+        const address = new Address(clientAddress);
+        const computer = new AddressComputer();
+        const shard = computer.getShardOfAddress(address);
+
+        let secretKeyStr = "";
+        switch (shard) {
+            case 0: secretKeyStr = env.RELAYER_SECRET_KEY_SHARD_0; break;
+            case 1: secretKeyStr = env.RELAYER_SECRET_KEY_SHARD_1; break;
+            case 2: secretKeyStr = env.RELAYER_SECRET_KEY_SHARD_2; break;
+            default: secretKeyStr = env.RELAYER_SECRET_KEY_SHARD_0; break;
+        }
+
+        const key = UserSecretKey.fromString(secretKeyStr);
+        return new UserSigner(key);
+    }
+
+    /**
      * Verifies that the payload was clearly signed by the Sender,
      * intended to be relayed by US (the Adapter).
      */
     static verifySignature(payload: RelayedPayload): boolean {
         try {
-            // Relayer Address assumed to be this Adapter's configured address
-            const relayerAddrStr = env.MARKETPLACE_ADDRESS; // Or dedicated env.RELAYER_ADDRESS if added
+            // Determine which Relayer Address the User SHOULD have used
+            const relayerAddrStr = this.getRelayerAddress(payload.sender);
 
             const tx = new Transaction({
                 nonce: BigInt(payload.nonce),
@@ -56,13 +98,11 @@ export class RelayerService {
      * and signs it with the Adapter's private key.
      */
     static async packRelayedTransaction(payload: RelayedPayload): Promise<Transaction> {
-        const relayerKey = UserSecretKey.fromString(env.RELAYER_SECRET_KEY);
-        // relayerKey.generatePublicKey().toAddress() returns UserAddress (sdk-wallet)
-        const relayerUserCert = relayerKey.generatePublicKey().toAddress();
-        // Convert to sdk-core Address implicitly via bech32 string
-        const relayerAddress = new Address(relayerUserCert.bech32());
+        // 1. Identify correct Relayer for this Sender's Shard
+        const relayerAddrStr = this.getRelayerAddress(payload.sender);
+        const relayerAddress = new Address(relayerAddrStr);
 
-        // Reconstruct logic same as Verify, but now we apply the signature
+        // 2. Reconstruct Transaction exactly as the User signed it
         const tx = new Transaction({
             nonce: BigInt(payload.nonce),
             value: BigInt(payload.value),
@@ -74,13 +114,14 @@ export class RelayerService {
             relayer: relayerAddress
         });
 
-        // Apply Sender Signature
+        // 3. Apply Sender's Signature
         tx.signature = Buffer.from(payload.signature, 'hex');
 
-        // Sign as Relayer
-        const signer = new UserSigner(relayerKey);
+        // 4. Sign as Relayer (ONLY set relayerSignature)
+        const signer = this.getRelayerSigner(payload.sender);
 
         // Compute bytes for Relayer Signing
+        // For RelayedV3, we sign the transaction object itself
         const computer = new TransactionComputer();
         const bytesToSign = computer.computeBytesForSigning(tx);
 

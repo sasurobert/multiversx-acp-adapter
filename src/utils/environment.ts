@@ -12,7 +12,9 @@ export interface Environment {
     MARKETPLACE_ADDRESS: string;
     VENDOR_ADDRESS: string;
     ESCROW_ADDRESS: string;
-    RELAYER_SECRET_KEY: string;
+    RELAYER_SECRET_KEY_SHARD_0: string;
+    RELAYER_SECRET_KEY_SHARD_1: string;
+    RELAYER_SECRET_KEY_SHARD_2: string;
     VENDOR_SECRET_KEY: string;
     GAS_LIMIT: number;
     SHOWCASE_COLLECTION?: string;
@@ -34,13 +36,15 @@ const requiredVars = [
     "MARKETPLACE_ADDRESS",
     "VENDOR_ADDRESS",
     "ESCROW_ADDRESS",
-    "RELAYER_SECRET_KEY",
+    "RELAYER_SECRET_KEY_SHARD_0",
+    "RELAYER_SECRET_KEY_SHARD_1",
+    "RELAYER_SECRET_KEY_SHARD_2",
     "VENDOR_SECRET_KEY"
 ];
 
 function validateEnv(): Environment {
     const missing = requiredVars.filter(key => !process.env[key]);
-    if (missing.length > 0) {
+    if (missing.length > 0 && process.env.NODE_ENV !== 'test' && process.env.TEST_MODE !== 'true') {
         throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
     }
 
@@ -63,7 +67,9 @@ function validateEnv(): Environment {
         MARKETPLACE_ADDRESS: process.env.MARKETPLACE_ADDRESS || jsonConfig.marketplace_address || "",
         VENDOR_ADDRESS: process.env.VENDOR_ADDRESS || jsonConfig.vendor_address || "",
         ESCROW_ADDRESS: process.env.ESCROW_ADDRESS || jsonConfig.escrow_address || "",
-        RELAYER_SECRET_KEY: process.env.RELAYER_SECRET_KEY || jsonConfig.relayer_secret_key || "",
+        RELAYER_SECRET_KEY_SHARD_0: process.env.RELAYER_SECRET_KEY_SHARD_0 || jsonConfig.relayer_secret_key_shard_0 || process.env.RELAYER_SECRET_KEY || jsonConfig.relayer_secret_key || "",
+        RELAYER_SECRET_KEY_SHARD_1: process.env.RELAYER_SECRET_KEY_SHARD_1 || jsonConfig.relayer_secret_key_shard_1 || process.env.RELAYER_SECRET_KEY || jsonConfig.relayer_secret_key || "",
+        RELAYER_SECRET_KEY_SHARD_2: process.env.RELAYER_SECRET_KEY_SHARD_2 || jsonConfig.relayer_secret_key_shard_2 || process.env.RELAYER_SECRET_KEY || jsonConfig.relayer_secret_key || "",
         VENDOR_SECRET_KEY: process.env.VENDOR_SECRET_KEY || jsonConfig.vendor_secret_key || "",
         GAS_LIMIT: parseInt(process.env.GAS_LIMIT || jsonConfig.gas_limit || "60000000"),
         SHOWCASE_COLLECTION: process.env.SHOWCASE_COLLECTION || jsonConfig.showcase_collection,
