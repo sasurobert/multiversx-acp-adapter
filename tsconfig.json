@@ -7,7 +7,16 @@
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "typeRoots": [
+            "./node_modules/@types"
+        ],
+        "types": [
+            "jest",
+            "node",
+            "express",
+            "supertest"
+        ]
     },
     "include": [
         "src/**/*"

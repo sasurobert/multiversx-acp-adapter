@@ -4,13 +4,13 @@ import express from "express";
 import { headersMiddleware } from "../../middleware/headers";
 
 describe("Headers Middleware", () => {
-    let app: express.Express;
+    let app: express.Application;
 
     beforeEach(() => {
         app = express();
         app.use(express.json());
         app.use(headersMiddleware);
-        app.post("/test", (req, res) => {
+        app.post("/test", (req: express.Request, res: express.Response) => {
             res.status(200).json({
                 locale: (req as unknown as { locale: string }).locale,
                 requestId: (req as unknown as { requestId: string }).requestId,

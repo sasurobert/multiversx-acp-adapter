@@ -5,8 +5,8 @@ import crypto from "crypto";
 
 describe("Signature Middleware", () => {
     const TEST_SECRET = "test_webhook_secret_123";
-    let mockReq: Partial<Request>;
-    let mockRes: Partial<Response>;
+    let mockReq: any;
+    let mockRes: any;
     let mockNext: NextFunction;
 
     beforeEach(() => {

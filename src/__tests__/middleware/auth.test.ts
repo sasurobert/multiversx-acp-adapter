@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach, jest } from "@jest/globals";
+import { describe, it, expect, beforeEach, jest } from "@jest/globals";
 import { authMiddleware } from "../../middleware/auth";
 import { Request, Response, NextFunction } from "express";
 
 describe("Auth Middleware", () => {
-    let mockReq: Partial<Request>;
-    let mockRes: Partial<Response>;
+    let mockReq: any;
+    let mockRes: any;
     let mockNext: NextFunction;
 
     beforeEach(() => {

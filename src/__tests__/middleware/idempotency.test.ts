@@ -4,14 +4,14 @@ import express from "express";
 import { idempotencyMiddleware, IdempotencyStore } from "../../middleware/idempotency";
 
 describe("Idempotency Middleware", () => {
-    let app: express.Express;
+    let app: express.Application;
 
     beforeEach(() => {
         IdempotencyStore.clear();
         app = express();
         app.use(express.json());
         app.use(idempotencyMiddleware);
-        app.post("/test", (req, res) => {
+        app.post("/test", (req: express.Request, res: express.Response) => {
             res.status(201).json({ id: `response_${Date.now()}`, data: req.body });
         });
     });
