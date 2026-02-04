@@ -17,7 +17,7 @@ jest.mock("../utils/environment", () => ({
 
 jest.mock("@multiversx/sdk-network-providers", () => ({
     ProxyNetworkProvider: jest.fn().mockImplementation(() => ({
-        sendTransaction: (jest.fn() as any).mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12") // eslint-disable-line @typescript-eslint/no-explicit-any
+        sendTransaction: jest.fn<() => Promise<string>>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12")
     }))
 }));
 

@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import { fetchProducts } from "./logic/products";
 import { logger } from "./utils/logger";
 import { env } from "./utils/environment";
@@ -34,7 +34,7 @@ app.use("/checkout_sessions", ...acpSecurity, checkoutSessionsRouter);
  * 0. Negotiation Endpoint (ACP Phase 1)
  * POST /negotiate
  */
-app.post("/negotiate", async (req, res) => {
+app.post("/negotiate", async (req: Request, res: Response) => {
     try {
         const rfp = req.body as RFP;
 
@@ -84,7 +84,7 @@ app.post("/negotiate", async (req, res) => {
  * 1. Product Feed Endpoint
  * GET /.well-known/acp/products.json
  */
-app.get("/.well-known/acp/products.json", async (req, res) => {
+app.get("/.well-known/acp/products.json", async (req: Request, res: Response) => {
     const products = await fetchProducts();
     res.json({ products });
 });
@@ -93,7 +93,7 @@ app.get("/.well-known/acp/products.json", async (req, res) => {
  * 2. Checkout Endpoint
  * POST /checkout
  */
-app.post("/checkout", async (req, res) => {
+app.post("/checkout", async (req: Request, res: Response) => {
     const { product_id, job_id, type } = req.body;
 
     // --- ESCROW FLOW (V2) ---
@@ -112,7 +112,7 @@ app.post("/checkout", async (req, res) => {
             return res.status(404).json({ error: "Job not found" });
         }
 
-        const proposal = (job as unknown as { proposal: { job_id: string; token: string; price: string; vendor_signature: string } }).proposal;
+        const proposal = job.proposal;
 
         // Build Deposit Payload
         const data = EscrowService.buildDepositPayload({
@@ -167,7 +167,7 @@ app.post("/checkout", async (req, res) => {
     const data = `buy@${tokenHex}@${nonceEven}@${quantityHex}`;
 
     // USE CONFIGURABLE ADDRESS
-    const dAppUrl = `https://wallet.multiversx.com/hook/sign?data=${data}&receiver=${env.MARKETPLACE_ADDRESS}`;
+    const dAppUrl = `${env.WALLET_URL}/hook/sign?data=${data}&receiver=${env.MARKETPLACE_ADDRESS}`;
 
     // Return ACP-compliant "Action"
     res.json({
@@ -186,7 +186,7 @@ app.post("/checkout", async (req, res) => {
  * Agent sends the signed payload here instead of User clicking a link.
  * Path aligned with ACP Delegated Payment Spec.
  */
-app.post("/agentic_commerce/delegate_payment", ...acpSecurity, async (req, res) => {
+app.post("/agentic_commerce/delegate_payment", ...acpSecurity, async (req: Request, res: Response) => {
     const body = req.body;
 
     // Validate if standard card payment (unsupported by this crypto-relayer)
@@ -218,7 +218,7 @@ app.post("/agentic_commerce/delegate_payment", ...acpSecurity, async (req, res) 
     StorageService.setPayment(paymentToken, {
         token: paymentToken,
         status: "pending",
-        ...payload
+        payload
     });
 
     res.status(201).json({
@@ -231,7 +231,7 @@ app.post("/agentic_commerce/delegate_payment", ...acpSecurity, async (req, res) 
  * 4. Capture (V2)
  * Merchant calls this to trigger the broadcast.
  */
-app.post("/capture", async (req, res) => {
+app.post("/capture", async (req: Request, res: Response) => {
     const { payment_token } = req.body;
 
     const payload = StorageService.payments[payment_token];
@@ -245,7 +245,7 @@ app.post("/capture", async (req, res) => {
     }
 
     // Broadcast
-    const txHash = await RelayerService.broadcastRelayed(payload as unknown as RelayedPayload);
+    const txHash = await RelayerService.broadcastRelayed(payload.payload);
 
     res.json({
         status: "processing",

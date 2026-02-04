@@ -11,7 +11,12 @@ describe("Storage Persistence Tests", () => {
 
     it("should persist and reload jobs across sessions", () => {
         const testJobId = "persistence-test-job-" + Date.now();
-        const testData = { id: testJobId, status: "TESTING", value: "some-data" };
+        const testData = {
+            id: testJobId,
+            status: "TESTING",
+            rfp: { rfp_id: "rfp1", client_id: "c1", task_description: "t1", budget_limit: "100", token_identifier: "EGLD", deadline_block: 100 },
+            proposal: { job_id: testJobId, price: "100", token: "EGLD", deadline_block: 100, vendor_signature: "sig1" }
+        };
 
         // 1. Set Job
         StorageService.setJob(testJobId, testData);
@@ -35,7 +40,11 @@ describe("Storage Persistence Tests", () => {
 
     it("should persist and reload payments across sessions", () => {
         const testToken = "persistence-test-token-" + Date.now();
-        const testPayload = { token: testToken, status: "pending", sender: "erd1...", signature: "sig" };
+        const testPayload = {
+            token: testToken,
+            status: "pending",
+            payload: { sender: "erd1...", receiver: "erd2...", nonce: 1, value: "0", data: "...", signature: "sig" }
+        };
 
         // 1. Set Payment
         StorageService.setPayment(testToken, testPayload);

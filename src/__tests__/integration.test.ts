@@ -2,9 +2,11 @@ import { describe, it, expect, jest } from "@jest/globals";
 import request from "supertest";
 import { app } from "../app";
 
+import { fetchProducts } from "../logic/products";
+
 // Mock the dependencies
 jest.mock("../logic/products", () => ({
-    fetchProducts: (jest.fn() as any).mockResolvedValue([ // eslint-disable-line @typescript-eslint/no-explicit-any
+    fetchProducts: jest.fn<typeof fetchProducts>().mockResolvedValue([
         {
             product_id: "EGLD-123-01",
             title: "Test NFT",
@@ -12,7 +14,8 @@ jest.mock("../logic/products", () => ({
             price: { amount: "0", currency: "EGLD" },
             custom_attributes: {
                 token_id: "EGLD-123",
-                nonce: 1
+                nonce: 1,
+                image_url: ""
             }
         }
     ])

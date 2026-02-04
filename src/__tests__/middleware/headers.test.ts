@@ -4,18 +4,17 @@ import express from "express";
 import { headersMiddleware } from "../../middleware/headers";
 
 describe("Headers Middleware", () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let app: any;
+    let app: express.Application;
 
     beforeEach(() => {
         app = express();
         app.use(express.json());
         app.use(headersMiddleware);
-        app.post("/test", (req: any, res: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+        app.post("/test", (req, res) => {
             res.status(200).json({
-                locale: (req as unknown as { locale: string }).locale,
-                requestId: (req as unknown as { requestId: string }).requestId,
-                apiVersion: (req as unknown as { apiVersion: string }).apiVersion
+                locale: req.locale,
+                requestId: req.requestId,
+                apiVersion: req.apiVersion
             });
         });
     });

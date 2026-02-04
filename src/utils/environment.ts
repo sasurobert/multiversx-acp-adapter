@@ -27,6 +27,7 @@ export interface Environment {
     RETURN_POLICY_URL: string;
     STORE_COUNTRY: string;
     ORDER_PERMALINK_BASE_URL: string;
+    WALLET_URL: string;
 }
 
 const requiredVars = [
@@ -76,7 +77,8 @@ function validateEnv(): Environment {
         SELLER_URL: process.env.SELLER_URL || jsonConfig.seller_url || "https://multiversx.com",
         RETURN_POLICY_URL: process.env.RETURN_POLICY_URL || jsonConfig.return_policy_url || "https://multiversx.com/terms",
         STORE_COUNTRY: process.env.STORE_COUNTRY || jsonConfig.store_country || "US",
-        ORDER_PERMALINK_BASE_URL: process.env.ORDER_PERMALINK_BASE_URL || jsonConfig.order_permalink_base_url || "https://multiversx.com/orders"
+        ORDER_PERMALINK_BASE_URL: process.env.ORDER_PERMALINK_BASE_URL || jsonConfig.order_permalink_base_url || "https://multiversx.com/orders",
+        WALLET_URL: process.env.WALLET_URL || jsonConfig.wallet_url || "https://wallet.multiversx.com"
     };
 }
 

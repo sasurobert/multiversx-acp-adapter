@@ -1,23 +1,27 @@
 import fs from "fs";
 import path from "path";
 import { logger } from "../utils/logger";
+import { RFP, Proposal } from "./negotiation";
+import { RelayedPayload } from "./relayer";
+import { CheckoutSession } from "../types/acp";
 
-export interface JobData {
+export interface JobData<T = RFP, P = Proposal> {
     id: string;
     status: string;
-    [key: string]: unknown;
+    rfp: T;
+    proposal: P;
 }
 
-export interface PaymentData {
+export interface PaymentData<T = RelayedPayload> {
     token: string;
     status: string;
-    [key: string]: unknown;
+    payload: T;
 }
 
-export interface SessionData {
+export interface SessionData<T = CheckoutSession> {
     id: string;
     status: string;
-    [key: string]: unknown;
+    data: T;
 }
 
 export class StorageService {
@@ -98,15 +102,15 @@ export class StorageService {
     /**
      * Adds or updates a checkout session and persists.
      */
-    static setSession<T extends { id: string; status: string }>(sessionId: string, data: T) {
-        this.sessions[sessionId] = data as unknown as SessionData;
+    static setSession(sessionId: string, data: SessionData) {
+        this.sessions[sessionId] = data;
         this.save();
     }
 
     /**
      * Gets a checkout session by ID.
      */
-    static getSession<T = SessionData>(sessionId: string): T | undefined {
-        return this.sessions[sessionId] as unknown as T;
+    static getSession<T = CheckoutSession>(sessionId: string): SessionData<T> | undefined {
+        return this.sessions[sessionId] as SessionData<T> | undefined;
     }
 }

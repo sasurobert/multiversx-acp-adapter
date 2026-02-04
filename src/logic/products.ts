@@ -43,7 +43,7 @@ export async function fetchAcpProducts(): Promise<AcpProductFeed[]> {
         }
 
         const url = `${env.API_URL}/nfts`;
-        const response = await axios.get(url, { params });
+        const response = await axios.get<MvxNft[]>(url, { params });
         const items = response.data;
 
         return items.map((item: MvxNft) => {

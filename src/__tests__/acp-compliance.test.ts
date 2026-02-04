@@ -62,7 +62,7 @@ describe("ACP Compliance Integration", () => {
             expect(res.status).toBe(201);
             expect(res.body.status).toBe("not_ready_for_payment");
             expect(res.body.fulfillment_options).toBeDefined();
-            expect(res.body.messages.some((m: { param: string }) => m.param === "$.fulfillment_address")).toBe(true);
+            expect(res.body.messages.some((m: { param?: string }) => m.param === "$.fulfillment_address")).toBe(true);
             sessionId = res.body.id;
         });
 

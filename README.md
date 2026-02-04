@@ -64,4 +64,7 @@ Run the integration tests to verify compliance with the ACP spec:
 ```bash
 npm test
 npm run test:coverage
-```
+
+## Production Readiness
+This project has been audited for compliance and security. See the [Full Report](PRODUCTION_READINESS_REPORT.md).
+

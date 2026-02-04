@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
 
-interface CachedResponse {
+interface CachedResponse<T = Record<string, unknown>> {
     status: number;
-    body: Record<string, unknown>;
+    body: T;
     requestHash: string;
     createdAt: number;
 }
@@ -26,10 +26,10 @@ export class IdempotencyStore {
         return entry;
     }
 
-    static set(key: string, status: number, body: Record<string, unknown>, requestHash: string): void {
+    static set<T = Record<string, unknown>>(key: string, status: number, body: T, requestHash: string): void {
         this.cache.set(key, {
             status,
-            body,
+            body: body as unknown as Record<string, unknown>,
             requestHash,
             createdAt: Date.now(),
         });

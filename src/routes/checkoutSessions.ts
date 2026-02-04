@@ -128,7 +128,11 @@ checkoutSessionsRouter.post("/", async (req: Request, res: Response) => {
             session.messages?.push(MessageService.createInfoMessage("all_set", "Great! Your order is ready for payment."));
         }
 
-        StorageService.setSession(sessionId, session);
+        StorageService.setSession(sessionId, {
+            id: sessionId,
+            status: session.status,
+            data: session
+        });
 
         return res.status(201).json(session);
     } catch (error) {
@@ -160,8 +164,8 @@ checkoutSessionsRouter.post("/:id", async (req: Request, res: Response) => {
 
         const body = req.body as UpdateCheckoutSessionRequest;
 
-        const session = StorageService.getSession<CheckoutSession>(id);
-        if (!session) {
+        const sessionData = StorageService.getSession(id);
+        if (!sessionData) {
             const error: AcpError = {
                 type: "invalid_request",
                 code: "invalid_request",
@@ -169,6 +173,7 @@ checkoutSessionsRouter.post("/:id", async (req: Request, res: Response) => {
             };
             return res.status(404).json(error);
         }
+        const session = sessionData.data;
 
         // Update items if provided
         if (body.items) {
@@ -200,7 +205,11 @@ checkoutSessionsRouter.post("/:id", async (req: Request, res: Response) => {
             }
         }
 
-        StorageService.setSession(id, session);
+        StorageService.setSession(id, {
+            id,
+            status: session.status,
+            data: session
+        });
 
         // Send order.updated webhook if status became ready_for_payment
         if (session.status === "ready_for_payment") {
@@ -250,8 +259,8 @@ checkoutSessionsRouter.get("/:id", async (req: Request, res: Response) => {
             return res.status(400).json(error);
         }
 
-        const session = StorageService.getSession<CheckoutSession>(id);
-        if (!session) {
+        const sessionData = StorageService.getSession(id);
+        if (!sessionData) {
             const error: AcpError = {
                 type: "invalid_request",
                 code: "invalid_request",
@@ -260,7 +269,7 @@ checkoutSessionsRouter.get("/:id", async (req: Request, res: Response) => {
             return res.status(404).json(error);
         }
 
-        return res.status(200).json(session);
+        return res.status(200).json(sessionData.data);
     } catch (error) {
         logger.error({ error }, "Error retrieving checkout session");
         const acpError: AcpError = {
@@ -290,8 +299,8 @@ checkoutSessionsRouter.post("/:id/complete", async (req: Request, res: Response)
 
         const body = req.body as CompleteCheckoutSessionRequest;
 
-        const session = StorageService.getSession<CheckoutSession>(id);
-        if (!session) {
+        const sessionData = StorageService.getSession<CheckoutSession>(id);
+        if (!sessionData) {
             const error: AcpError = {
                 type: "invalid_request",
                 code: "invalid_request",
@@ -299,6 +308,7 @@ checkoutSessionsRouter.post("/:id/complete", async (req: Request, res: Response)
             };
             return res.status(404).json(error);
         }
+        const session = sessionData.data;
 
         if (session.status === "completed") {
             const error: AcpError = {
@@ -338,7 +348,11 @@ checkoutSessionsRouter.post("/:id/complete", async (req: Request, res: Response)
             permalink_url: `${env.ORDER_PERMALINK_BASE_URL}/${orderId}`,
         };
 
-        StorageService.setSession(id, session);
+        StorageService.setSession(id, {
+            id,
+            status: session.status,
+            data: session
+        });
 
         // Send order.created webhook
         const orderData: OrderEventData = {
@@ -387,8 +401,8 @@ checkoutSessionsRouter.post("/:id/cancel", async (req: Request, res: Response) =
             return res.status(400).json(error);
         }
 
-        const session = StorageService.getSession<CheckoutSession>(id);
-        if (!session) {
+        const sessionData = StorageService.getSession<CheckoutSession>(id);
+        if (!sessionData) {
             const error: AcpError = {
                 type: "invalid_request",
                 code: "invalid_request",
@@ -396,6 +410,7 @@ checkoutSessionsRouter.post("/:id/cancel", async (req: Request, res: Response) =
             };
             return res.status(404).json(error);
         }
+        const session = sessionData.data;
 
         if (session.status === "completed" || session.status === "canceled") {
             const error: AcpError = {
@@ -407,7 +422,11 @@ checkoutSessionsRouter.post("/:id/cancel", async (req: Request, res: Response) =
         }
 
         session.status = "canceled";
-        StorageService.setSession(id, session);
+        StorageService.setSession(id, {
+            id,
+            status: session.status,
+            data: session
+        });
 
         return res.status(200).json(session);
     } catch (error) {

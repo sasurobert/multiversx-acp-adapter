@@ -1,16 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { logger } from "../utils/logger";
 
-declare global {
-    namespace Express {
-        interface Request {
-            locale?: string;
-            requestId?: string;
-            apiVersion?: string;
-        }
-    }
-}
-
 const SUPPORTED_API_VERSIONS = ["2025-09-12"];
 
 /**
