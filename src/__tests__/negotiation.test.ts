@@ -1,5 +1,4 @@
 import { NegotiationService, RFP } from "../logic/negotiation";
-import { env } from "../utils/environment";
 
 jest.mock("../utils/environment", () => ({
     env: {
@@ -10,7 +9,6 @@ jest.mock("../utils/environment", () => ({
 
 describe("NegotiationService", () => {
     // We use a fixed key that matches the mock for consistent signature verification if needed
-    const vendorKeyHex = "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
 
     beforeAll(() => {
     });

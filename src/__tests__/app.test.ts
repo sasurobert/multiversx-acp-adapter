@@ -1,7 +1,7 @@
+import { describe, it, expect, beforeAll, jest } from "@jest/globals";
 import request from "supertest";
 import { app } from "../app";
-import { Mnemonic } from "@multiversx/sdk-wallet";
-import { env } from "../utils/environment";
+
 
 jest.mock("../utils/environment", () => ({
     env: {

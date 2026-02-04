@@ -1,10 +1,16 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import { fetchProducts } from "./logic/products";
+import { logger } from "./utils/logger";
 import { env } from "./utils/environment";
 import { RelayerService, RelayedPayload } from "./logic/relayer";
 import { NegotiationService, RFP } from "./logic/negotiation";
 import { EscrowService } from "./logic/escrow";
 import { StorageService } from "./logic/storage";
+import { checkoutSessionsRouter } from "./routes/checkoutSessions";
+import { authMiddleware } from "./middleware/auth";
+import { signatureMiddleware } from "./middleware/signature";
+import { idempotencyMiddleware } from "./middleware/idempotency";
+import { headersMiddleware } from "./middleware/headers";
 
 export const app = express();
 
@@ -13,17 +19,32 @@ app.use(express.json());
 // Initialize Storage
 StorageService.init();
 
+// ACP-compliant security and headers middleware
+const acpSecurity = [
+    authMiddleware,
+    signatureMiddleware,
+    idempotencyMiddleware,
+    headersMiddleware
+];
+
+// Mount ACP-compliant checkout sessions routes
+app.use("/checkout_sessions", ...acpSecurity, checkoutSessionsRouter);
+
 /**
  * 0. Negotiation Endpoint (ACP Phase 1)
  * POST /negotiate
  */
-app.post("/negotiate", async (req, res) => {
+app.post("/negotiate", async (req: Request, res: Response) => {
     try {
         const rfp = req.body as RFP;
 
         // Basic Validation
         if (!rfp.rfp_id || !rfp.client_id || !rfp.budget_limit) {
-            res.status(400).json({ error: "Missing required RFP fields" });
+            res.status(400).json({
+                type: "invalid_request",
+                code: "invalid_request",
+                message: "Missing required RFP fields"
+            });
             return;
         }
 
@@ -31,6 +52,7 @@ app.post("/negotiate", async (req, res) => {
 
         // Store Job Persistently
         StorageService.setJob(proposal.job_id, {
+            id: proposal.job_id,
             status: "NEGOTIATED",
             rfp,
             proposal
@@ -49,8 +71,12 @@ app.post("/negotiate", async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Negotiation failed:", error);
-        res.status(500).json({ error: error instanceof Error ? error.message : "Internal Server Error" });
+        logger.error({ error }, "Negotiation failed");
+        res.status(500).json({
+            type: "processing_error",
+            code: "processing_error",
+            message: error instanceof Error ? error.message : "Internal Server Error"
+        });
     }
 });
 
@@ -58,7 +84,7 @@ app.post("/negotiate", async (req, res) => {
  * 1. Product Feed Endpoint
  * GET /.well-known/acp/products.json
  */
-app.get("/.well-known/acp/products.json", async (req, res) => {
+app.get("/.well-known/acp/products.json", async (req: Request, res: Response) => {
     const products = await fetchProducts();
     res.json({ products });
 });
@@ -67,13 +93,17 @@ app.get("/.well-known/acp/products.json", async (req, res) => {
  * 2. Checkout Endpoint
  * POST /checkout
  */
-app.post("/checkout", async (req, res) => {
+app.post("/checkout", async (req: Request, res: Response) => {
     const { product_id, job_id, type } = req.body;
 
     // --- ESCROW FLOW (V2) ---
     if (type === "escrow") {
         if (!job_id) {
-            return res.status(400).json({ error: "Missing job_id for escrow checkout" });
+            return res.status(400).json({
+                type: "invalid_request",
+                code: "invalid_request",
+                message: "Missing job_id for escrow checkout"
+            });
         }
 
         const job = StorageService.jobs[job_id];
@@ -109,14 +139,22 @@ app.post("/checkout", async (req, res) => {
 
     // --- RETAIL FLOW (V1) ---
     if (!product_id) {
-        return res.status(400).json({ error: "Missing product_id" });
+        return res.status(400).json({
+            type: "invalid_request",
+            code: "invalid_request",
+            message: "Missing product_id"
+        });
     }
 
     const products = await fetchProducts();
     const product = products.find(p => p.product_id === product_id);
 
     if (!product) {
-        return res.status(404).json({ error: "Product not found or not in showcase" });
+        return res.status(404).json({
+            type: "invalid_request",
+            code: "not_found",
+            message: "Product not found or not in showcase"
+        });
     }
 
     // Construct Transaction Data
@@ -129,7 +167,7 @@ app.post("/checkout", async (req, res) => {
     const data = `buy@${tokenHex}@${nonceEven}@${quantityHex}`;
 
     // USE CONFIGURABLE ADDRESS
-    const dAppUrl = `https://wallet.multiversx.com/hook/sign?data=${data}&receiver=${env.MARKETPLACE_ADDRESS}`;
+    const dAppUrl = `${env.WALLET_URL}/hook/sign?data=${data}&receiver=${env.MARKETPLACE_ADDRESS}`;
 
     // Return ACP-compliant "Action"
     res.json({
@@ -146,41 +184,68 @@ app.post("/checkout", async (req, res) => {
 /**
  * 3. Delegate Payment (V2)
  * Agent sends the signed payload here instead of User clicking a link.
+ * Path aligned with ACP Delegated Payment Spec.
  */
-app.post("/delegate_payment", async (req, res) => {
-    const payload = req.body as RelayedPayload;
+app.post("/agentic_commerce/delegate_payment", ...acpSecurity, async (req: Request, res: Response) => {
+    const body = req.body;
 
-    // Validate Signature
+    // Validate if standard card payment (unsupported by this crypto-relayer)
+    if (body.payment_method?.type === "card") {
+        return res.status(400).json({
+            type: "invalid_request",
+            code: "unsupported_payment_method",
+            message: "This adapter only supports MultiversX crypto relayed transactions"
+        });
+    }
+
+    const payload = body as RelayedPayload;
+
+    // Validate MultiversX Signature
     const isValid = RelayerService.verifySignature(payload);
 
     if (!isValid) {
-        return res.status(401).json({ error: "Invalid Signature" });
+        return res.status(401).json({
+            type: "invalid_request",
+            code: "unauthorized",
+            message: "Invalid MultiversX signature"
+        });
     }
 
     // Generate Payment Token (Ref ID)
     const paymentToken = `acp_mvx_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
     // Store payload persistently
-    StorageService.setPayment(paymentToken, payload);
+    StorageService.setPayment(paymentToken, {
+        token: paymentToken,
+        status: "pending",
+        payload
+    });
 
-    res.json({ payment_token: paymentToken });
+    res.status(201).json({
+        id: paymentToken,
+        created: new Date().toISOString()
+    });
 });
 
 /**
  * 4. Capture (V2)
  * Merchant calls this to trigger the broadcast.
  */
-app.post("/capture", async (req, res) => {
+app.post("/capture", async (req: Request, res: Response) => {
     const { payment_token } = req.body;
 
     const payload = StorageService.payments[payment_token];
 
     if (!payload) {
-        return res.status(404).json({ error: "Invalid payment token" });
+        return res.status(404).json({
+            type: "invalid_request",
+            code: "not_found",
+            message: "Invalid payment token"
+        });
     }
 
     // Broadcast
-    const txHash = await RelayerService.broadcastRelayed(payload);
+    const txHash = await RelayerService.broadcastRelayed(payload.payload);
 
     res.json({
         status: "processing",

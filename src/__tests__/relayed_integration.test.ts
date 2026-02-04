@@ -1,9 +1,9 @@
+import { describe, it, expect, beforeAll, jest } from "@jest/globals";
 import request from "supertest";
 import { app } from "../app";
 import { Mnemonic, UserSigner } from "@multiversx/sdk-wallet";
 import { Transaction, Address, TransactionComputer } from "@multiversx/sdk-core";
-import { RelayerService } from "../logic/relayer";
-import { env } from "../utils/environment";
+
 
 jest.mock("../utils/environment", () => ({
     env: {
@@ -17,7 +17,7 @@ jest.mock("../utils/environment", () => ({
 
 jest.mock("@multiversx/sdk-network-providers", () => ({
     ProxyNetworkProvider: jest.fn().mockImplementation(() => ({
-        sendTransaction: jest.fn().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12")
+        sendTransaction: jest.fn<() => Promise<string>>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12")
     }))
 }));
 
@@ -62,12 +62,12 @@ describe("Relayed Payment Integration (V2)", () => {
 
         // 2. Agent calls /delegate_payment
         const res1 = await request(app)
-            .post("/delegate_payment")
+            .post("/agentic_commerce/delegate_payment")
             .send(payload)
-            .expect(200);
+            .expect(201);
 
-        expect(res1.body.payment_token).toBeDefined();
-        const paymentToken = res1.body.payment_token;
+        expect(res1.body.id).toBeDefined();
+        const paymentToken = res1.body.id;
 
         // 3. Trigger /capture
         const res2 = await request(app)

@@ -5,4 +5,10 @@ module.exports = {
     transform: {
         '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
     },
+    transformIgnorePatterns: [
+        'node_modules/(?!(uuid)/)',
+    ],
+    testPathIgnorePatterns: ["/node_modules/", "/dist/"],
+    collectCoverageFrom: ["src/**/*.ts", "!src/**/*.test.ts"],
+    coverageDirectory: "coverage",
 };

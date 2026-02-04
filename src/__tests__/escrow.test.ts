@@ -1,3 +1,4 @@
+import { describe, it, expect } from "@jest/globals";
 import { EscrowService } from "../logic/escrow";
 
 describe("EscrowService", () => {

@@ -1,9 +1,12 @@
+import { describe, it, expect, jest } from "@jest/globals";
 import request from "supertest";
 import { app } from "../app";
 
+import { fetchProducts } from "../logic/products";
+
 // Mock the dependencies
 jest.mock("../logic/products", () => ({
-    fetchProducts: jest.fn().mockResolvedValue([
+    fetchProducts: jest.fn<typeof fetchProducts>().mockResolvedValue([
         {
             product_id: "EGLD-123-01",
             title: "Test NFT",
@@ -11,7 +14,8 @@ jest.mock("../logic/products", () => ({
             price: { amount: "0", currency: "EGLD" },
             custom_attributes: {
                 token_id: "EGLD-123",
-                nonce: 1
+                nonce: 1,
+                image_url: ""
             }
         }
     ])
@@ -54,7 +58,7 @@ describe("ACP Adapter Integration Tests", () => {
                 .send({ product_id: "INVALID-ID" });
 
             expect(res.status).toBe(404);
-            expect(res.body.error).toContain("not found");
+            expect(res.body.message).toContain("not found");
         });
 
         it("should return 400 for missing product_id", async () => {
@@ -63,7 +67,7 @@ describe("ACP Adapter Integration Tests", () => {
                 .send({});
 
             expect(res.status).toBe(400);
-            expect(res.body.error).toBe("Missing product_id");
+            expect(res.body.message).toBe("Missing product_id");
         });
     });
 });
