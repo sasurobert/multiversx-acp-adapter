@@ -1,9 +1,10 @@
+import { describe, it, expect, jest } from "@jest/globals";
 import request from "supertest";
 import { app } from "../app";
 
 // Mock the dependencies
 jest.mock("../logic/products", () => ({
-    fetchProducts: jest.fn().mockResolvedValue([
+    fetchProducts: (jest.fn() as any).mockResolvedValue([
         {
             product_id: "EGLD-123-01",
             title: "Test NFT",

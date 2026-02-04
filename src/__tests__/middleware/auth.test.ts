@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, jest } from "@jest/globals";
 import { authMiddleware } from "../../middleware/auth";
 import { Request, Response, NextFunction } from "express";
 
@@ -9,8 +10,8 @@ describe("Auth Middleware", () => {
     beforeEach(() => {
         mockReq = { headers: {} };
         mockRes = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn().mockReturnThis(),
+            status: jest.fn().mockReturnThis() as any,
+            json: jest.fn().mockReturnThis() as any,
         };
         mockNext = jest.fn();
         // Reset environment for tests

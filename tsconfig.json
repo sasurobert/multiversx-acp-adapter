@@ -7,10 +7,7 @@
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-        "types": [
-            "jest"
-        ]
+        "forceConsistentCasingInFileNames": true
     },
     "include": [
         "src/**/*"

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll, jest } from "@jest/globals";
 import request from "supertest";
 import { app } from "../app";
 import { Mnemonic, UserSigner } from "@multiversx/sdk-wallet";
@@ -16,7 +17,7 @@ jest.mock("../utils/environment", () => ({
 
 jest.mock("@multiversx/sdk-network-providers", () => ({
     ProxyNetworkProvider: jest.fn().mockImplementation(() => ({
-        sendTransaction: jest.fn().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12")
+        sendTransaction: (jest.fn() as any).mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12")
     }))
 }));
 

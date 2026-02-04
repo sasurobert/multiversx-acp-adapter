@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from "@jest/globals";
 import { signatureMiddleware } from "../../middleware/signature";
 import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
@@ -11,8 +12,8 @@ describe("Signature Middleware", () => {
     beforeEach(() => {
         process.env.ACP_SIGNING_SECRET = TEST_SECRET;
         mockRes = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn().mockReturnThis(),
+            status: jest.fn().mockReturnThis() as any,
+            json: jest.fn().mockReturnThis() as any,
         };
         mockNext = jest.fn();
     });
