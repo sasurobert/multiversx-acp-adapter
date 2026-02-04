@@ -52,7 +52,7 @@ function validateEnv(): Environment {
             const raw = fs.readFileSync(configPath, 'utf-8');
             jsonConfig = JSON.parse(raw);
         }
-    } catch (e) {
+    } catch {
         logger.warn("Could not load config.json, relying solely on ENV");
     }
 
@@ -69,7 +69,7 @@ function validateEnv(): Environment {
         DEFAULT_TOKEN_ID: process.env.DEFAULT_TOKEN_ID || jsonConfig.default_token_id,
         OPENAI_WEBHOOK_URL: process.env.OPENAI_WEBHOOK_URL || jsonConfig.openai_webhook_url,
         OPENAI_WEBHOOK_SECRET: process.env.OPENAI_WEBHOOK_SECRET || jsonConfig.openai_webhook_secret,
-        ENV: (process.env.NODE_ENV as any) || "dev",
+        ENV: (process.env.NODE_ENV as "dev" | "prod" | "test") || "dev",
         ACP_API_KEY: process.env.ACP_API_KEY || jsonConfig.acp_api_key,
         ACP_SIGNING_SECRET: process.env.ACP_SIGNING_SECRET || jsonConfig.acp_signing_secret,
         SELLER_NAME: process.env.SELLER_NAME || jsonConfig.seller_name || "MultiversX Store",

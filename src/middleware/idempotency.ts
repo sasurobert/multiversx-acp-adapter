@@ -3,7 +3,7 @@ import crypto from "crypto";
 
 interface CachedResponse {
     status: number;
-    body: any;
+    body: Record<string, unknown>;
     requestHash: string;
     createdAt: number;
 }
@@ -26,7 +26,7 @@ export class IdempotencyStore {
         return entry;
     }
 
-    static set(key: string, status: number, body: any, requestHash: string): void {
+    static set(key: string, status: number, body: Record<string, unknown>, requestHash: string): void {
         this.cache.set(key, {
             status,
             body,
@@ -87,7 +87,7 @@ export function idempotencyMiddleware(req: Request, res: Response, next: NextFun
 
     // Wrap the response.json method to capture the success responses
     const originalJson = res.json.bind(res);
-    res.json = function (body: any) {
+    res.json = function (body: Record<string, unknown>) {
         // Only cache successful or non-server-error responses if needed
         // For ACP, we typically cache the final result
         if (res.statusCode >= 200 && res.statusCode < 500) {

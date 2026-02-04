@@ -1,7 +1,6 @@
 import request from "supertest";
 import { app } from "../app";
-import { Mnemonic } from "@multiversx/sdk-wallet";
-import { env } from "../utils/environment";
+
 
 jest.mock("../utils/environment", () => ({
     env: {

@@ -11,9 +11,9 @@ describe("Headers Middleware", () => {
         app.use(headersMiddleware);
         app.post("/test", (req, res) => {
             res.status(200).json({
-                locale: (req as any).locale,
-                requestId: (req as any).requestId,
-                apiVersion: (req as any).apiVersion
+                locale: (req as unknown as { locale: string }).locale,
+                requestId: (req as unknown as { requestId: string }).requestId,
+                apiVersion: (req as unknown as { apiVersion: string }).apiVersion
             });
         });
     });

@@ -1,7 +1,6 @@
 import request from "supertest";
 import { app } from "../app";
 import crypto from "crypto";
-import { RelayerService } from "../logic/relayer";
 
 jest.mock("../logic/relayer", () => ({
     RelayerService: {
@@ -18,7 +17,7 @@ describe("Delegated Payment Alignment", () => {
         process.env.ACP_SIGNING_SECRET = SIGNING_SECRET;
     });
 
-    function getAuthHeaders(body: any = {}) {
+    function getAuthHeaders(body: Record<string, unknown> = {}) {
         const timestamp = new Date().toISOString();
         const bodyStr = JSON.stringify(body);
         const signature = crypto

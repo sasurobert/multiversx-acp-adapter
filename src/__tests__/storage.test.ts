@@ -1,9 +1,7 @@
-import fs from "fs";
-import path from "path";
 import { StorageService } from "../logic/storage";
 
 describe("Storage Persistence Tests", () => {
-    const dataDir = path.join(process.cwd(), "data");
+
 
     beforeAll(() => {
         // Clear any existing test data if needed, or just let it run

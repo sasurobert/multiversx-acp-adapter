@@ -18,12 +18,26 @@ export interface AcpProduct {
     };
 }
 
+interface MvxNft {
+    identifier: string;
+    collection: string;
+    nonce: number;
+    name?: string;
+    url?: string;
+    price?: string;
+    attributes?: {
+        description?: string;
+    };
+    media?: Array<{ url: string }>;
+}
+
+
 /**
  * Fetches products from MultiversX and maps them to the ACP Product Feed Spec.
  */
 export async function fetchAcpProducts(): Promise<AcpProductFeed[]> {
     try {
-        const params: any = { size: 10 };
+        const params: Record<string, unknown> = { size: 10 };
         if (env.SHOWCASE_COLLECTION) {
             params.collection = env.SHOWCASE_COLLECTION;
         }
@@ -32,7 +46,7 @@ export async function fetchAcpProducts(): Promise<AcpProductFeed[]> {
         const response = await axios.get(url, { params });
         const items = response.data;
 
-        return items.map((item: any) => {
+        return items.map((item: MvxNft) => {
             const tokenId = item.identifier.split("-").slice(0, 2).join("-");
             const priceValue = item.price || "0";
 
@@ -54,7 +68,7 @@ export async function fetchAcpProducts(): Promise<AcpProductFeed[]> {
                 return_policy: env.RETURN_POLICY_URL,
                 target_countries: [env.STORE_COUNTRY],
                 store_country: env.STORE_COUNTRY,
-                additional_image_urls: item.media?.slice(1).map((m: any) => m.url).join(","),
+                additional_image_urls: item.media?.slice(1).map((m: { url: string }) => m.url).join(","),
                 condition: "new",
             };
         });

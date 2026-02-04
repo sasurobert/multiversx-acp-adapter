@@ -24,7 +24,7 @@ export function verifySignature(
             Buffer.from(signature),
             Buffer.from(expected)
         );
-    } catch (e) {
+    } catch {
         return false;
     }
 }

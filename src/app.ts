@@ -112,7 +112,7 @@ app.post("/checkout", async (req, res) => {
             return res.status(404).json({ error: "Job not found" });
         }
 
-        const proposal = (job as any).proposal;
+        const proposal = (job as unknown as { proposal: { job_id: string; token: string; price: string; vendor_signature: string } }).proposal;
 
         // Build Deposit Payload
         const data = EscrowService.buildDepositPayload({

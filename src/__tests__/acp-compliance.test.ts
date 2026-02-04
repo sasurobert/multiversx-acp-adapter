@@ -12,7 +12,7 @@ describe("ACP Compliance Integration", () => {
         process.env.ORDER_PERMALINK_BASE_URL = "https://test.com/orders";
     });
 
-    function getAuthHeaders(body: any = {}) {
+    function getAuthHeaders(body: Record<string, unknown> = {}) {
         const timestamp = new Date().toISOString();
         const bodyStr = JSON.stringify(body);
         const signature = crypto
@@ -61,7 +61,7 @@ describe("ACP Compliance Integration", () => {
             expect(res.status).toBe(201);
             expect(res.body.status).toBe("not_ready_for_payment");
             expect(res.body.fulfillment_options).toBeDefined();
-            expect(res.body.messages.some((m: any) => m.param === "$.fulfillment_address")).toBe(true);
+            expect(res.body.messages.some((m: { param: string }) => m.param === "$.fulfillment_address")).toBe(true);
             sessionId = res.body.id;
         });
 
@@ -107,7 +107,7 @@ describe("ACP Compliance Integration", () => {
                 buyer: { email: "john@example.com", name: "John Doe" },
                 payment_data: { token: "tok_123", provider: "multiversx" }
             };
-            const headers = getAuthHeaders(body) as any;
+            const headers = getAuthHeaders(body) as Record<string, string>;
             headers["Idempotency-Key"] = "idem_key_complete_123";
 
             const res1 = await request(app)

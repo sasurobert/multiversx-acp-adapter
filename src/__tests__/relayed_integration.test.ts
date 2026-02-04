@@ -2,8 +2,7 @@ import request from "supertest";
 import { app } from "../app";
 import { Mnemonic, UserSigner } from "@multiversx/sdk-wallet";
 import { Transaction, Address, TransactionComputer } from "@multiversx/sdk-core";
-import { RelayerService } from "../logic/relayer";
-import { env } from "../utils/environment";
+
 
 jest.mock("../utils/environment", () => ({
     env: {
