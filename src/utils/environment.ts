@@ -19,6 +19,13 @@ export interface Environment {
     OPENAI_WEBHOOK_URL?: string;
     OPENAI_WEBHOOK_SECRET?: string;
     ENV: "test" | "dev" | "prod";
+    ACP_API_KEY?: string;
+    ACP_SIGNING_SECRET?: string;
+    SELLER_NAME: string;
+    SELLER_URL: string;
+    RETURN_POLICY_URL: string;
+    STORE_COUNTRY: string;
+    ORDER_PERMALINK_BASE_URL: string;
 }
 
 const requiredVars = [
@@ -59,9 +66,15 @@ function validateEnv(): Environment {
         GAS_LIMIT: parseInt(process.env.GAS_LIMIT || jsonConfig.gas_limit || "60000000"),
         SHOWCASE_COLLECTION: process.env.SHOWCASE_COLLECTION || jsonConfig.showcase_collection,
         DEFAULT_TOKEN_ID: process.env.DEFAULT_TOKEN_ID || jsonConfig.default_token_id,
-        OPENAI_WEBHOOK_URL: process.env.OPENAI_WEBHOOK_URL,
         OPENAI_WEBHOOK_SECRET: process.env.OPENAI_WEBHOOK_SECRET,
-        ENV: (process.env.NODE_ENV as any) || "dev"
+        ENV: (process.env.NODE_ENV as any) || "dev",
+        ACP_API_KEY: process.env.ACP_API_KEY,
+        ACP_SIGNING_SECRET: process.env.ACP_SIGNING_SECRET,
+        SELLER_NAME: process.env.SELLER_NAME || jsonConfig.seller_name || "MultiversX Store",
+        SELLER_URL: process.env.SELLER_URL || jsonConfig.seller_url || "https://multiversx.com",
+        RETURN_POLICY_URL: process.env.RETURN_POLICY_URL || jsonConfig.return_policy_url || "https://multiversx.com/terms",
+        STORE_COUNTRY: process.env.STORE_COUNTRY || jsonConfig.store_country || "US",
+        ORDER_PERMALINK_BASE_URL: process.env.ORDER_PERMALINK_BASE_URL || jsonConfig.order_permalink_base_url || "https://multiversx.com/orders"
     };
 }
 

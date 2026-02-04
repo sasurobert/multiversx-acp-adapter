@@ -6,6 +6,10 @@ import { NegotiationService, RFP } from "./logic/negotiation";
 import { EscrowService } from "./logic/escrow";
 import { StorageService } from "./logic/storage";
 import { checkoutSessionsRouter } from "./routes/checkoutSessions";
+import { authMiddleware } from "./middleware/auth";
+import { signatureMiddleware } from "./middleware/signature";
+import { idempotencyMiddleware } from "./middleware/idempotency";
+import { headersMiddleware } from "./middleware/headers";
 
 export const app = express();
 
@@ -14,8 +18,16 @@ app.use(express.json());
 // Initialize Storage
 StorageService.init();
 
+// ACP-compliant security and headers middleware
+const acpSecurity = [
+    authMiddleware,
+    signatureMiddleware,
+    idempotencyMiddleware,
+    headersMiddleware
+];
+
 // Mount ACP-compliant checkout sessions routes
-app.use("/checkout_sessions", checkoutSessionsRouter);
+app.use("/checkout_sessions", ...acpSecurity, checkoutSessionsRouter);
 
 /**
  * 0. Negotiation Endpoint (ACP Phase 1)
@@ -151,15 +163,31 @@ app.post("/checkout", async (req, res) => {
 /**
  * 3. Delegate Payment (V2)
  * Agent sends the signed payload here instead of User clicking a link.
+ * Path aligned with ACP Delegated Payment Spec.
  */
-app.post("/delegate_payment", async (req, res) => {
-    const payload = req.body as RelayedPayload;
+app.post("/agentic_commerce/delegate_payment", ...acpSecurity, async (req, res) => {
+    const body = req.body;
 
-    // Validate Signature
+    // Validate if standard card payment (unsupported by this crypto-relayer)
+    if (body.payment_method?.type === "card") {
+        return res.status(400).json({
+            type: "invalid_request",
+            code: "unsupported_payment_method",
+            message: "This adapter only supports MultiversX crypto relayed transactions"
+        });
+    }
+
+    const payload = body as RelayedPayload;
+
+    // Validate MultiversX Signature
     const isValid = RelayerService.verifySignature(payload);
 
     if (!isValid) {
-        return res.status(401).json({ error: "Invalid Signature" });
+        return res.status(401).json({
+            type: "invalid_request",
+            code: "unauthorized",
+            message: "Invalid MultiversX signature"
+        });
     }
 
     // Generate Payment Token (Ref ID)
@@ -172,7 +200,10 @@ app.post("/delegate_payment", async (req, res) => {
         ...payload
     });
 
-    res.json({ payment_token: paymentToken });
+    res.status(201).json({
+        id: paymentToken,
+        created: new Date().toISOString()
+    });
 });
 
 /**

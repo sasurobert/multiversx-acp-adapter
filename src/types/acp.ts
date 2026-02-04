@@ -3,44 +3,45 @@
  * Based on: https://developers.openai.com/commerce/specs/checkout
  */
 
-export type CheckoutSessionStatus = 
-  | "not_ready_for_payment" 
-  | "ready_for_payment" 
-  | "completed" 
+export type CheckoutSessionStatus =
+  | "not_ready_for_payment"
+  | "ready_for_payment"
+  | "completed"
   | "canceled";
 
 export type MessageType = "info" | "error";
 
-export type MessageCode = 
-  | "missing" 
-  | "invalid" 
-  | "out_of_stock" 
-  | "payment_declined" 
-  | "requires_sign_in" 
+export type MessageCode =
+  | "missing"
+  | "invalid"
+  | "out_of_stock"
+  | "payment_declined"
+  | "requires_sign_in"
   | "requires_3ds";
 
 export type LinkType = "terms_of_use" | "privacy_policy" | "seller_shop_policies";
 
-export type TotalType = 
-  | "items_base_amount" 
-  | "items_discount" 
-  | "subtotal" 
-  | "discount" 
-  | "fulfillment" 
-  | "tax" 
-  | "fee" 
+export type TotalType =
+  | "items_base_amount"
+  | "items_discount"
+  | "subtotal"
+  | "discount"
+  | "fulfillment"
+  | "tax"
+  | "fee"
   | "total";
 
 export type FulfillmentType = "shipping" | "digital";
 
 export type PaymentProvider = "stripe" | "adyen" | "braintree" | "multiversx";
 
-export type OrderStatus = 
-  | "created" 
-  | "manual_review" 
-  | "confirmed" 
-  | "canceled" 
-  | "shipped" 
+export type OrderStatus =
+  | "created"
+  | "updated"  // For order.updated webhooks
+  | "manual_review"
+  | "confirmed"
+  | "canceled"
+  | "shipped"
   | "fulfilled";
 
 export type WebhookEventType = "order.created" | "order.updated";
@@ -69,10 +70,9 @@ export interface Total {
 
 export interface Message {
   type: MessageType;
-  code?: MessageCode;
-  path?: string;
-  content_type: "plain" | "markdown";
-  content: string;
+  code?: string;
+  field?: string;
+  message: string;
 }
 
 export interface Link {
@@ -82,8 +82,8 @@ export interface Link {
 
 export interface Address {
   name: string;
-  line_one: string;
-  line_two?: string;
+  line1: string;
+  line2?: string;
   city: string;
   state: string;
   country: string;
@@ -119,6 +119,8 @@ export interface Buyer {
   name: string;
   email: string;
   phone_number?: string;
+  first_name?: string; // Legacy/Internal
+  last_name?: string;  // Legacy/Internal
 }
 
 export interface CheckoutSession {
@@ -135,6 +137,20 @@ export interface CheckoutSession {
   messages?: Message[];
   links?: Link[];
   order_id?: string;
+  order?: Order;
+}
+
+export interface Order {
+  id: string;
+  checkout_session_id: string;
+  permalink_url: string;
+}
+
+export type RefundType = "store_credit" | "original_payment";
+
+export interface Refund {
+  type: RefundType;
+  amount: number;
 }
 
 // Request/Response types
@@ -166,6 +182,8 @@ export interface OrderEventData {
   line_items: LineItem[];
   fulfillment_address?: Address;
   buyer: Buyer;
+  permalink_url: string;
+  refunds: Refund[];
   created_at: string;
   updated_at: string;
 }

@@ -12,6 +12,9 @@ import {
     OrderEventData,
     AcpError,
 } from "../types/acp";
+import { FulfillmentService } from "../logic/fulfillment";
+import { MessageService } from "../logic/messages";
+import { env } from "../utils/environment";
 
 export const checkoutSessionsRouter = Router();
 
@@ -84,6 +87,10 @@ checkoutSessionsRouter.post("/", async (req: Request, res: Response) => {
         // Determine status based on whether we have fulfillment address
         const status = body.fulfillment_address ? "ready_for_payment" : "not_ready_for_payment";
 
+        // Get Fulfillment Options
+        const fulfillmentOptions = FulfillmentService.getOptions(body.fulfillment_address);
+        const defaultFulfillmentId = FulfillmentService.getDefaultOptionId(fulfillmentOptions);
+
         const session: CheckoutSession = {
             id: sessionId,
             status,
@@ -91,11 +98,14 @@ checkoutSessionsRouter.post("/", async (req: Request, res: Response) => {
             line_items: lineItems,
             totals,
             fulfillment_address: body.fulfillment_address,
+            fulfillment_options: fulfillmentOptions,
+            fulfillment_option_id: defaultFulfillmentId,
             payment_provider: {
                 provider: "multiversx",
                 supported_payment_methods: ["crypto_wallet"],
             },
             buyer: body.buyer,
+            messages: [],
             links: [
                 {
                     type: "terms_of_use",
@@ -103,6 +113,13 @@ checkoutSessionsRouter.post("/", async (req: Request, res: Response) => {
                 },
             ],
         };
+
+        // Add initial validation messages
+        if (!session.fulfillment_address) {
+            session.messages?.push(MessageService.createFieldErrorMessage("fulfillment_address", "Fulfillment address is required to proceed."));
+        } else if (session.status === "ready_for_payment") {
+            session.messages?.push(MessageService.createInfoMessage("all_set", "Great! Your order is ready for payment."));
+        }
 
         StorageService.setSession(sessionId, session);
 
@@ -149,6 +166,8 @@ checkoutSessionsRouter.post("/:id", async (req: Request, res: Response) => {
         // Update fulfillment address if provided
         if (body.fulfillment_address) {
             session.fulfillment_address = body.fulfillment_address;
+            session.fulfillment_options = FulfillmentService.getOptions(body.fulfillment_address);
+            session.fulfillment_option_id = FulfillmentService.getDefaultOptionId(session.fulfillment_options);
         }
 
         // Update fulfillment option if provided
@@ -156,12 +175,39 @@ checkoutSessionsRouter.post("/:id", async (req: Request, res: Response) => {
             session.fulfillment_option_id = body.fulfillment_option_id;
         }
 
-        // Update status based on whether we have required info
+        // Update status and add messages based on whether we have required info
+        session.messages = [];
         if (session.fulfillment_address && session.line_items.length > 0) {
             session.status = "ready_for_payment";
+            session.messages.push(MessageService.createInfoMessage("all_set", "Great! Your order is ready for payment."));
+        } else {
+            session.status = "not_ready_for_payment";
+            if (!session.fulfillment_address) {
+                session.messages.push(MessageService.createFieldErrorMessage("fulfillment_address", "Fulfillment address is required to proceed."));
+            }
         }
 
         StorageService.setSession(id, session);
+
+        // Send order.updated webhook if status became ready_for_payment
+        if (session.status === "ready_for_payment") {
+            const orderData: OrderEventData = {
+                type: "order",
+                order_id: session.order_id || "",
+                checkout_session_id: session.id,
+                status: "updated",
+                total_amount: session.totals.find((t: Total) => t.type === "total")?.amount || 0,
+                currency: session.currency,
+                line_items: session.line_items,
+                fulfillment_address: session.fulfillment_address,
+                buyer: session.buyer || { email: "unknown@example.com", name: "Unknown" },
+                permalink_url: session.order?.permalink_url || "",
+                refunds: [],
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            };
+            WebhookService.sendWebhook(WebhookService.createOrderUpdatedEvent(orderData)).catch(console.error);
+        }
 
         return res.status(201).json(session);
     } catch (error) {
@@ -256,7 +302,13 @@ checkoutSessionsRouter.post("/:id/complete", async (req: Request, res: Response)
         // Update session with buyer and mark as completed
         session.buyer = body.buyer;
         session.status = "completed";
-        session.order_id = `order_${randomUUID()}`;
+        const orderId = `order_${randomUUID()}`;
+        session.order_id = orderId;
+        session.order = {
+            id: orderId,
+            checkout_session_id: session.id,
+            permalink_url: `${env.ORDER_PERMALINK_BASE_URL}/${orderId}`,
+        };
 
         StorageService.setSession(id, session);
 
@@ -271,6 +323,8 @@ checkoutSessionsRouter.post("/:id/complete", async (req: Request, res: Response)
             line_items: session.line_items,
             fulfillment_address: session.fulfillment_address,
             buyer: session.buyer,
+            permalink_url: session.order.permalink_url,
+            refunds: [],
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         };

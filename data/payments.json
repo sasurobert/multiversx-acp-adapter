@@ -118,5 +118,17 @@
     "value": "1000000000000000000",
     "data": "cGF5bWVudF9mb3Jfam9iXzEyMw==",
     "signature": "2c168e9a943d80f779ef61d51a68111c69e741a87072ff58ae8f3c2f76a2cc80c4c832c499320a6e45826703e56e8615b4432aae215dd31c1af3116fd6f2300f"
+  },
+  "acp_mvx_1770215411234_524": {
+    "token": "acp_mvx_1770215411234_524",
+    "status": "pending",
+    "signature": "mock_sig",
+    "sender": "erd1qyu5wth66p63p4p9ct55393u8yk8358485kwnfayqay7zrtf98sqe4u2rs",
+    "receiver": "erd1spy9qqz890v06y62600gq74m78u8yye8r5054cy9a39j229fs6cqdqz46u",
+    "nonce": 1,
+    "value": "0",
+    "gasLimit": 60000000,
+    "chainId": "D",
+    "data": "YnV5QFRva2VuSGV4QE5vbmNlQFF0eQ=="
   }
 }
