@@ -1,5 +1,6 @@
 import axios from "axios";
 import { env } from "../utils/environment";
+import { logger } from "../utils/logger";
 import { AcpProductFeed } from "../types/productFeed";
 
 export interface AcpProduct {
@@ -58,7 +59,7 @@ export async function fetchAcpProducts(): Promise<AcpProductFeed[]> {
             };
         });
     } catch (error) {
-        console.error("Failed to fetch products:", error);
+        logger.error({ error }, "Failed to fetch products");
         return [];
     }
 }

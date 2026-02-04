@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { logger } from "../utils/logger";
 import { env } from "../utils/environment";
 
 /**
@@ -10,7 +11,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
 
     // Skip auth if not configured (dev mode)
     if (!apiKey) {
-        console.warn("⚠️ ACP_API_KEY not configured, skipping authentication");
+        logger.warn("⚠️ ACP_API_KEY not configured, skipping authentication");
         next();
         return;
     }

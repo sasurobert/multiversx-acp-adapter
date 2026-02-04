@@ -1,6 +1,7 @@
 import { UserVerifier, UserPublicKey, UserSigner, UserSecretKey } from "@multiversx/sdk-wallet";
 import { Address, Transaction, TransactionComputer } from "@multiversx/sdk-core";
 import { ProxyNetworkProvider } from "@multiversx/sdk-network-providers";
+import { logger } from "../utils/logger";
 import { env } from "../utils/environment";
 
 export interface RelayedPayload {
@@ -45,7 +46,7 @@ export class RelayerService {
 
             return verifier.verify(serialized, signatureBuffer);
         } catch (error) {
-            console.error("Verification failed:", error);
+            logger.error({ error }, "Verification failed");
             return false;
         }
     }
@@ -94,7 +95,7 @@ export class RelayerService {
      * The Adapter (this service) pays the gas.
      */
     static async broadcastRelayed(payload: RelayedPayload): Promise<string> {
-        console.log(`[Relayer] Broadcasting tx from ${payload.sender} to ${payload.receiver}`);
+        logger.info({ sender: payload.sender, receiver: payload.receiver }, "[Relayer] Broadcasting tx");
 
         try {
             const tx = await this.packRelayedTransaction(payload);
@@ -103,10 +104,10 @@ export class RelayerService {
             const provider = new ProxyNetworkProvider(env.API_URL);
 
             const hash = await provider.sendTransaction(tx);
-            console.log(`[Relayer] Transaction sent: ${hash}`);
+            logger.info({ hash }, "[Relayer] Transaction sent");
             return hash;
         } catch (e) {
-            console.error("Broadcast failed:", e);
+            logger.error({ error: e }, "Broadcast failed");
             throw e;
         }
     }

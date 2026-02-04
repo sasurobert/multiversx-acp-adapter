@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { logger } from "../utils/logger";
 
 export interface JobData {
     id: string;
@@ -41,7 +42,7 @@ export class StorageService {
             try {
                 this.jobs = JSON.parse(fs.readFileSync(this.jobsFile, "utf-8"));
             } catch (e) {
-                console.error("Failed to load jobs storage:", e);
+                logger.error({ error: e }, "Failed to load jobs storage");
                 this.jobs = {};
             }
         }
@@ -50,7 +51,7 @@ export class StorageService {
             try {
                 this.payments = JSON.parse(fs.readFileSync(this.paymentsFile, "utf-8"));
             } catch (e) {
-                console.error("Failed to load payments storage:", e);
+                logger.error({ error: e }, "Failed to load payments storage");
                 this.payments = {};
             }
         }
@@ -59,7 +60,7 @@ export class StorageService {
             try {
                 this.sessions = JSON.parse(fs.readFileSync(this.sessionsFile, "utf-8"));
             } catch (e) {
-                console.error("Failed to load sessions storage:", e);
+                logger.error({ error: e }, "Failed to load sessions storage");
                 this.sessions = {};
             }
         }
@@ -74,7 +75,7 @@ export class StorageService {
             fs.writeFileSync(this.paymentsFile, JSON.stringify(this.payments, null, 2));
             fs.writeFileSync(this.sessionsFile, JSON.stringify(this.sessions, null, 2));
         } catch (e) {
-            console.error("Failed to save storage:", e);
+            logger.error({ error: e }, "Failed to save storage");
         }
     }
 

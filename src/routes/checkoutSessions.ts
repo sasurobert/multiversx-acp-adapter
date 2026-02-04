@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { randomUUID } from "crypto";
 import { StorageService } from "../logic/storage";
+import { logger } from "../utils/logger";
 import { WebhookService } from "../logic/webhooks";
 import {
     CheckoutSession,
@@ -131,7 +132,7 @@ checkoutSessionsRouter.post("/", async (req: Request, res: Response) => {
 
         return res.status(201).json(session);
     } catch (error) {
-        console.error("Error creating checkout session:", error);
+        logger.error({ error }, "Error creating checkout session");
         const acpError: AcpError = {
             type: "processing_error",
             code: "processing_error",
@@ -218,12 +219,12 @@ checkoutSessionsRouter.post("/:id", async (req: Request, res: Response) => {
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             };
-            WebhookService.sendWebhook(WebhookService.createOrderUpdatedEvent(orderData)).catch(console.error);
+            WebhookService.sendWebhook(WebhookService.createOrderUpdatedEvent(orderData)).catch((e) => logger.error({ error: e }, "Failed to send update webhook"));
         }
 
         return res.status(201).json(session);
     } catch (error) {
-        console.error("Error updating checkout session:", error);
+        logger.error({ error }, "Error updating checkout session");
         const acpError: AcpError = {
             type: "processing_error",
             code: "processing_error",
@@ -261,7 +262,7 @@ checkoutSessionsRouter.get("/:id", async (req: Request, res: Response) => {
 
         return res.status(200).json(session);
     } catch (error) {
-        console.error("Error retrieving checkout session:", error);
+        logger.error({ error }, "Error retrieving checkout session");
         const acpError: AcpError = {
             type: "processing_error",
             code: "processing_error",
@@ -360,7 +361,7 @@ checkoutSessionsRouter.post("/:id/complete", async (req: Request, res: Response)
 
         return res.status(201).json(session);
     } catch (error) {
-        console.error("Error completing checkout session:", error);
+        logger.error({ error }, "Error completing checkout session");
         const acpError: AcpError = {
             type: "processing_error",
             code: "processing_error",
@@ -410,7 +411,7 @@ checkoutSessionsRouter.post("/:id/cancel", async (req: Request, res: Response) =
 
         return res.status(200).json(session);
     } catch (error) {
-        console.error("Error canceling checkout session:", error);
+        logger.error({ error }, "Error canceling checkout session");
         const acpError: AcpError = {
             type: "processing_error",
             code: "processing_error",

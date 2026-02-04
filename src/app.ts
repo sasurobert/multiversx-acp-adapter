@@ -1,5 +1,6 @@
 import express from "express";
 import { fetchProducts } from "./logic/products";
+import { logger } from "./utils/logger";
 import { env } from "./utils/environment";
 import { RelayerService, RelayedPayload } from "./logic/relayer";
 import { NegotiationService, RFP } from "./logic/negotiation";
@@ -70,7 +71,7 @@ app.post("/negotiate", async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Negotiation failed:", error);
+        logger.error({ error }, "Negotiation failed");
         res.status(500).json({
             type: "processing_error",
             code: "processing_error",

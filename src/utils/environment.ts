@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import { logger } from "./logger";
 
 // Load .env file
 dotenv.config();
@@ -52,24 +53,25 @@ function validateEnv(): Environment {
             jsonConfig = JSON.parse(raw);
         }
     } catch (e) {
-        console.warn("Could not load config.json, relying solely on ENV");
+        logger.warn("Could not load config.json, relying solely on ENV");
     }
 
     return {
         API_URL: process.env.API_URL || jsonConfig.api_url || "https://devnet-api.multiversx.com",
         CHAIN_ID: process.env.CHAIN_ID || jsonConfig.chain_id || "D",
         MARKETPLACE_ADDRESS: process.env.MARKETPLACE_ADDRESS || jsonConfig.marketplace_address || "",
-        VENDOR_ADDRESS: process.env.VENDOR_ADDRESS || "",
-        ESCROW_ADDRESS: process.env.ESCROW_ADDRESS || "",
-        RELAYER_SECRET_KEY: process.env.RELAYER_SECRET_KEY || "",
-        VENDOR_SECRET_KEY: process.env.VENDOR_SECRET_KEY || "",
+        VENDOR_ADDRESS: process.env.VENDOR_ADDRESS || jsonConfig.vendor_address || "",
+        ESCROW_ADDRESS: process.env.ESCROW_ADDRESS || jsonConfig.escrow_address || "",
+        RELAYER_SECRET_KEY: process.env.RELAYER_SECRET_KEY || jsonConfig.relayer_secret_key || "",
+        VENDOR_SECRET_KEY: process.env.VENDOR_SECRET_KEY || jsonConfig.vendor_secret_key || "",
         GAS_LIMIT: parseInt(process.env.GAS_LIMIT || jsonConfig.gas_limit || "60000000"),
         SHOWCASE_COLLECTION: process.env.SHOWCASE_COLLECTION || jsonConfig.showcase_collection,
         DEFAULT_TOKEN_ID: process.env.DEFAULT_TOKEN_ID || jsonConfig.default_token_id,
-        OPENAI_WEBHOOK_SECRET: process.env.OPENAI_WEBHOOK_SECRET,
+        OPENAI_WEBHOOK_URL: process.env.OPENAI_WEBHOOK_URL || jsonConfig.openai_webhook_url,
+        OPENAI_WEBHOOK_SECRET: process.env.OPENAI_WEBHOOK_SECRET || jsonConfig.openai_webhook_secret,
         ENV: (process.env.NODE_ENV as any) || "dev",
-        ACP_API_KEY: process.env.ACP_API_KEY,
-        ACP_SIGNING_SECRET: process.env.ACP_SIGNING_SECRET,
+        ACP_API_KEY: process.env.ACP_API_KEY || jsonConfig.acp_api_key,
+        ACP_SIGNING_SECRET: process.env.ACP_SIGNING_SECRET || jsonConfig.acp_signing_secret,
         SELLER_NAME: process.env.SELLER_NAME || jsonConfig.seller_name || "MultiversX Store",
         SELLER_URL: process.env.SELLER_URL || jsonConfig.seller_url || "https://multiversx.com",
         RETURN_POLICY_URL: process.env.RETURN_POLICY_URL || jsonConfig.return_policy_url || "https://multiversx.com/terms",

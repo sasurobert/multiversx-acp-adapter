@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { logger } from "../utils/logger";
 
 declare global {
     namespace Express {
@@ -32,7 +33,7 @@ export function headersMiddleware(req: Request, res: Response, next: NextFunctio
     if (apiVersion) {
         req.apiVersion = apiVersion;
         if (!SUPPORTED_API_VERSIONS.includes(apiVersion)) {
-            console.warn(`⚠️ Unsupported API version: ${apiVersion}`);
+            logger.warn({ apiVersion }, "⚠️ Unsupported API version");
         }
     }
 

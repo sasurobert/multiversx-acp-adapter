@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { logger } from "../utils/logger";
 import crypto from "crypto";
 import { env } from "../utils/environment";
 
@@ -36,7 +37,7 @@ export function signatureMiddleware(req: Request, res: Response, next: NextFunct
 
     // Skip if not configured (Development mode)
     if (!secret) {
-        console.warn("⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification");
+        logger.warn("⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification");
         next();
         return;
     }
