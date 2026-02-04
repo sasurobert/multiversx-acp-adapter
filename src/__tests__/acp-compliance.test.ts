@@ -61,7 +61,7 @@ describe("ACP Compliance Integration", () => {
             expect(res.status).toBe(201);
             expect(res.body.status).toBe("not_ready_for_payment");
             expect(res.body.fulfillment_options).toBeDefined();
-            expect(res.body.messages.some((m: any) => m.field === "fulfillment_address")).toBe(true);
+            expect(res.body.messages.some((m: any) => m.param === "$.fulfillment_address")).toBe(true);
             sessionId = res.body.id;
         });
 
@@ -69,7 +69,7 @@ describe("ACP Compliance Integration", () => {
             const body = {
                 fulfillment_address: {
                     name: "John Doe",
-                    line1: "123 Main St",
+                    line_one: "123 Main St",
                     city: "New York",
                     state: "NY",
                     country: "US",
@@ -96,7 +96,7 @@ describe("ACP Compliance Integration", () => {
                 .set(getAuthHeaders(body))
                 .send(body);
 
-            expect(res.status).toBe(200);
+            expect(res.status).toBe(201);
             expect(res.body.status).toBe("completed");
             expect(res.body.order).toBeDefined();
             expect(res.body.order.permalink_url).toContain("orders/order_");

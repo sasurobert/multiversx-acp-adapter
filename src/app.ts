@@ -39,7 +39,11 @@ app.post("/negotiate", async (req, res) => {
 
         // Basic Validation
         if (!rfp.rfp_id || !rfp.client_id || !rfp.budget_limit) {
-            res.status(400).json({ error: "Missing required RFP fields" });
+            res.status(400).json({
+                type: "invalid_request",
+                code: "invalid_request",
+                message: "Missing required RFP fields"
+            });
             return;
         }
 
@@ -67,7 +71,11 @@ app.post("/negotiate", async (req, res) => {
         });
     } catch (error) {
         console.error("Negotiation failed:", error);
-        res.status(500).json({ error: error instanceof Error ? error.message : "Internal Server Error" });
+        res.status(500).json({
+            type: "processing_error",
+            code: "processing_error",
+            message: error instanceof Error ? error.message : "Internal Server Error"
+        });
     }
 });
 
@@ -90,7 +98,11 @@ app.post("/checkout", async (req, res) => {
     // --- ESCROW FLOW (V2) ---
     if (type === "escrow") {
         if (!job_id) {
-            return res.status(400).json({ error: "Missing job_id for escrow checkout" });
+            return res.status(400).json({
+                type: "invalid_request",
+                code: "invalid_request",
+                message: "Missing job_id for escrow checkout"
+            });
         }
 
         const job = StorageService.jobs[job_id];
@@ -126,14 +138,22 @@ app.post("/checkout", async (req, res) => {
 
     // --- RETAIL FLOW (V1) ---
     if (!product_id) {
-        return res.status(400).json({ error: "Missing product_id" });
+        return res.status(400).json({
+            type: "invalid_request",
+            code: "invalid_request",
+            message: "Missing product_id"
+        });
     }
 
     const products = await fetchProducts();
     const product = products.find(p => p.product_id === product_id);
 
     if (!product) {
-        return res.status(404).json({ error: "Product not found or not in showcase" });
+        return res.status(404).json({
+            type: "invalid_request",
+            code: "not_found",
+            message: "Product not found or not in showcase"
+        });
     }
 
     // Construct Transaction Data
@@ -216,7 +236,11 @@ app.post("/capture", async (req, res) => {
     const payload = StorageService.payments[payment_token];
 
     if (!payload) {
-        return res.status(404).json({ error: "Invalid payment token" });
+        return res.status(404).json({
+            type: "invalid_request",
+            code: "not_found",
+            message: "Invalid payment token"
+        });
     }
 
     // Broadcast

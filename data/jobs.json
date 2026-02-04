@@ -604,5 +604,119 @@
       "deadline_block": 6000,
       "vendor_signature": "6b826221e0bb2e8ad264ca5bf096f9e349452b8436e35015a5e7d47f2aa38cfea04f14fed8780df45146e391aa6eb40e8ebf6f98d34ff9363031379ca43ac806"
     }
+  },
+  "9a87243e-6f19-4d06-beb7-74359d8de60d": {
+    "id": "9a87243e-6f19-4d06-beb7-74359d8de60d",
+    "status": "NEGOTIATED",
+    "rfp": {
+      "rfp_id": "rfp-integration-test",
+      "client_id": "erd1client...",
+      "task_description": "Integration Test Task",
+      "budget_limit": "1000000",
+      "token_identifier": "USDC-c76f1f",
+      "deadline_block": 5000
+    },
+    "proposal": {
+      "job_id": "9a87243e-6f19-4d06-beb7-74359d8de60d",
+      "price": "1000000",
+      "token": "USDC-c76f1f",
+      "deadline_block": 5000,
+      "vendor_signature": "6aed6ec14d747fd3aacb9d3b361edbd35a7e573a517734ffb36e48ab81651f22399e8f014232f377afb2967f5195c4c22b646913fdbdbca4785292082a7b0a04"
+    }
+  },
+  "8b09b090-be67-44f0-ab77-f920fbeb8a29": {
+    "id": "8b09b090-be67-44f0-ab77-f920fbeb8a29",
+    "status": "NEGOTIATED",
+    "rfp": {
+      "rfp_id": "rfp-flow-test",
+      "client_id": "erd1client...",
+      "task_description": "Flow Test",
+      "budget_limit": "5000",
+      "token_identifier": "EGLD",
+      "deadline_block": 6000
+    },
+    "proposal": {
+      "job_id": "8b09b090-be67-44f0-ab77-f920fbeb8a29",
+      "price": "5000",
+      "token": "EGLD",
+      "deadline_block": 6000,
+      "vendor_signature": "2504e98945d3656eb2950607ac2cdf400a8d91b818a85e504f5961e6eb50d5890ec2783e84dd09a13e72d0b8576c3ca046547f850b39c7fcb1e3ba46ad67ff0a"
+    }
+  },
+  "a4114bfc-6ad5-4cb4-a4ab-3145175a386f": {
+    "id": "a4114bfc-6ad5-4cb4-a4ab-3145175a386f",
+    "status": "NEGOTIATED",
+    "rfp": {
+      "rfp_id": "rfp-integration-test",
+      "client_id": "erd1client...",
+      "task_description": "Integration Test Task",
+      "budget_limit": "1000000",
+      "token_identifier": "USDC-c76f1f",
+      "deadline_block": 5000
+    },
+    "proposal": {
+      "job_id": "a4114bfc-6ad5-4cb4-a4ab-3145175a386f",
+      "price": "1000000",
+      "token": "USDC-c76f1f",
+      "deadline_block": 5000,
+      "vendor_signature": "09226f80f57affc2d7faf4a1eb41a3b02c82e1d21830219599a42e7ad02ce5f8d03f8327045943b20c44e81bd663b5736f5dbbf4f304d0765c258c9ceab60c0c"
+    }
+  },
+  "db0a2fa7-c418-4b86-9ea7-5210ea3620b3": {
+    "id": "db0a2fa7-c418-4b86-9ea7-5210ea3620b3",
+    "status": "NEGOTIATED",
+    "rfp": {
+      "rfp_id": "rfp-flow-test",
+      "client_id": "erd1client...",
+      "task_description": "Flow Test",
+      "budget_limit": "5000",
+      "token_identifier": "EGLD",
+      "deadline_block": 6000
+    },
+    "proposal": {
+      "job_id": "db0a2fa7-c418-4b86-9ea7-5210ea3620b3",
+      "price": "5000",
+      "token": "EGLD",
+      "deadline_block": 6000,
+      "vendor_signature": "c3bf4d0c024280734402d71240efc4d6f2c36a8e3ab4c678874b9ed7704fbcb2aa914edca9c5cd8bcfed1ab2f736a1ebe3113badbdf495f9ed0a2fcbbe15ec07"
+    }
+  },
+  "15420c1c-0d30-45aa-9ef4-e98406099ff9": {
+    "id": "15420c1c-0d30-45aa-9ef4-e98406099ff9",
+    "status": "NEGOTIATED",
+    "rfp": {
+      "rfp_id": "rfp-integration-test",
+      "client_id": "erd1client...",
+      "task_description": "Integration Test Task",
+      "budget_limit": "1000000",
+      "token_identifier": "USDC-c76f1f",
+      "deadline_block": 5000
+    },
+    "proposal": {
+      "job_id": "15420c1c-0d30-45aa-9ef4-e98406099ff9",
+      "price": "1000000",
+      "token": "USDC-c76f1f",
+      "deadline_block": 5000,
+      "vendor_signature": "168cb982e9a77de6db01b582ca9fa81e89d06638424065e2ad48bea1182c9fc4ef5c81c410258f2da90b816f2a74f5991c2e30c3c16af3b45d03ff49b70aed05"
+    }
+  },
+  "194cc361-ba12-46c2-845c-ba58c2be015d": {
+    "id": "194cc361-ba12-46c2-845c-ba58c2be015d",
+    "status": "NEGOTIATED",
+    "rfp": {
+      "rfp_id": "rfp-flow-test",
+      "client_id": "erd1client...",
+      "task_description": "Flow Test",
+      "budget_limit": "5000",
+      "token_identifier": "EGLD",
+      "deadline_block": 6000
+    },
+    "proposal": {
+      "job_id": "194cc361-ba12-46c2-845c-ba58c2be015d",
+      "price": "5000",
+      "token": "EGLD",
+      "deadline_block": 6000,
+      "vendor_signature": "a8d1e8a1bc860418e5991beea1bfaccaff0d81f4114f7a4be0949c278e688d84698937f9100c69462317f9cd089a4ea44915ddaa0b0e865e86734d50730d7400"
+    }
   }
 }

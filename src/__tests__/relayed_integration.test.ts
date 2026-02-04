@@ -62,12 +62,12 @@ describe("Relayed Payment Integration (V2)", () => {
 
         // 2. Agent calls /delegate_payment
         const res1 = await request(app)
-            .post("/delegate_payment")
+            .post("/agentic_commerce/delegate_payment")
             .send(payload)
-            .expect(200);
+            .expect(201);
 
-        expect(res1.body.payment_token).toBeDefined();
-        const paymentToken = res1.body.payment_token;
+        expect(res1.body.id).toBeDefined();
+        const paymentToken = res1.body.id;
 
         // 3. Trigger /capture
         const res2 = await request(app)

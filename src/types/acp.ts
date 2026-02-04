@@ -44,7 +44,7 @@ export type OrderStatus =
   | "shipped"
   | "fulfilled";
 
-export type WebhookEventType = "order.created" | "order.updated";
+export type WebhookEventType = "order_created" | "order_updated";
 
 export interface Item {
   id: string;
@@ -71,8 +71,9 @@ export interface Total {
 export interface Message {
   type: MessageType;
   code?: string;
-  field?: string;
-  message: string;
+  param?: string; // RFC 9535 JSONPath
+  content_type?: "plain" | "markdown";
+  content: string;
 }
 
 export interface Link {
@@ -82,8 +83,8 @@ export interface Link {
 
 export interface Address {
   name: string;
-  line1: string;
-  line2?: string;
+  line_one: string;
+  line_two?: string;
   city: string;
   state: string;
   country: string;
@@ -196,7 +197,8 @@ export interface WebhookEvent {
 
 // Error types
 export interface AcpError {
+  type: "invalid_request" | "rate_limit_exceeded" | "processing_error" | "service_unavailable";
   code: string;
   message: string;
-  path?: string;
+  param?: string; // JSONPath referring to offending field
 }

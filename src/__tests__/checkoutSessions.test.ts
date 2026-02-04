@@ -161,7 +161,7 @@ describe("Checkout Sessions API", () => {
                         provider: "multiversx",
                     },
                 })
-                .expect(200);
+                .expect(201);
 
             expect(completeResponse.body.status).toBe("completed");
             expect(completeResponse.body.order_id).toMatch(/^order_/);
@@ -298,6 +298,7 @@ describe("Checkout Sessions API", () => {
                 .post("/checkout_sessions/invalid_session_id/cancel")
                 .expect(404);
 
+            expect(response.body.type).toBe("invalid_request");
             expect(response.body.code).toBe("invalid_request");
         });
     });

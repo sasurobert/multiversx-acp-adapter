@@ -28,11 +28,15 @@ export class WebhookService {
                 .update(payload)
                 .digest("hex");
 
+            // ACP spec: Merchant_Name-Signature
+            const merchantName = env.SELLER_NAME.replace(/\s+/g, "_");
+            const signatureHeader = `${merchantName}-Signature`;
+
             // Send webhook
             await axios.post(env.OPENAI_WEBHOOK_URL, payload, {
                 headers: {
                     "Content-Type": "application/json",
-                    "X-Merchant-Signature": signature,
+                    [signatureHeader]: signature,
                 },
                 timeout: 5000, // 5 second timeout
             });
@@ -45,22 +49,22 @@ export class WebhookService {
     }
 
     /**
-     * Creates an order.created webhook event
+     * Creates an order_created webhook event
      */
     static createOrderCreatedEvent(orderData: OrderEventData): WebhookEvent {
         return {
-            type: "order.created",
+            type: "order_created",
             timestamp: new Date().toISOString(),
             data: orderData,
         };
     }
 
     /**
-     * Creates an order.updated webhook event
+     * Creates an order_updated webhook event
      */
     static createOrderUpdatedEvent(orderData: OrderEventData): WebhookEvent {
         return {
-            type: "order.updated",
+            type: "order_updated",
             timestamp: new Date().toISOString(),
             data: orderData,
         };

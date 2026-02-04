@@ -7,9 +7,10 @@ export class MessageService {
     static createFieldErrorMessage(field: string, message: string): Message {
         return {
             type: "error",
-            code: "invalid_field",
-            field,
-            message,
+            code: "invalid",
+            param: `$.${field}`,
+            content_type: "plain",
+            content: message,
         };
     }
 
@@ -20,7 +21,8 @@ export class MessageService {
         return {
             type: "info",
             code,
-            message,
+            content_type: "plain",
+            content: message,
         };
     }
 
@@ -30,8 +32,9 @@ export class MessageService {
     static createGenericError(message: string): Message {
         return {
             type: "error",
-            code: "generic_error",
-            message,
+            code: "invalid_request",
+            content_type: "plain",
+            content: message,
         };
     }
 }

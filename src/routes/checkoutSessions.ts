@@ -74,8 +74,10 @@ checkoutSessionsRouter.post("/", async (req: Request, res: Response) => {
 
         if (!body.items || body.items.length === 0) {
             const error: AcpError = {
+                type: "invalid_request",
                 code: "invalid_request",
                 message: "items field is required and must not be empty",
+                param: "$.items",
             };
             return res.status(400).json(error);
         }
@@ -109,8 +111,12 @@ checkoutSessionsRouter.post("/", async (req: Request, res: Response) => {
             links: [
                 {
                     type: "terms_of_use",
-                    url: "https://multiversx.com/terms",
+                    url: env.RETURN_POLICY_URL, // Using configured policy URL
                 },
+                {
+                    type: "privacy_policy",
+                    url: env.RETURN_POLICY_URL, // Or a separate one if available
+                }
             ],
         };
 
@@ -127,6 +133,7 @@ checkoutSessionsRouter.post("/", async (req: Request, res: Response) => {
     } catch (error) {
         console.error("Error creating checkout session:", error);
         const acpError: AcpError = {
+            type: "processing_error",
             code: "processing_error",
             message: error instanceof Error ? error.message : "Internal server error",
         };
@@ -142,7 +149,11 @@ checkoutSessionsRouter.post("/:id", async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         if (Array.isArray(id)) {
-            const error: AcpError = { code: "invalid_request", message: "Invalid session ID" };
+            const error: AcpError = {
+                type: "invalid_request",
+                code: "invalid_request",
+                message: "Invalid session ID"
+            };
             return res.status(400).json(error);
         }
 
@@ -151,6 +162,7 @@ checkoutSessionsRouter.post("/:id", async (req: Request, res: Response) => {
         const session = StorageService.getSession<CheckoutSession>(id);
         if (!session) {
             const error: AcpError = {
+                type: "invalid_request",
                 code: "invalid_request",
                 message: "Checkout session not found",
             };
@@ -213,6 +225,7 @@ checkoutSessionsRouter.post("/:id", async (req: Request, res: Response) => {
     } catch (error) {
         console.error("Error updating checkout session:", error);
         const acpError: AcpError = {
+            type: "processing_error",
             code: "processing_error",
             message: error instanceof Error ? error.message : "Internal server error",
         };
@@ -228,13 +241,18 @@ checkoutSessionsRouter.get("/:id", async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         if (Array.isArray(id)) {
-            const error: AcpError = { code: "invalid_request", message: "Invalid session ID" };
+            const error: AcpError = {
+                type: "invalid_request",
+                code: "invalid_request",
+                message: "Invalid session ID"
+            };
             return res.status(400).json(error);
         }
 
         const session = StorageService.getSession<CheckoutSession>(id);
         if (!session) {
             const error: AcpError = {
+                type: "invalid_request",
                 code: "invalid_request",
                 message: "Checkout session not found",
             };
@@ -245,6 +263,7 @@ checkoutSessionsRouter.get("/:id", async (req: Request, res: Response) => {
     } catch (error) {
         console.error("Error retrieving checkout session:", error);
         const acpError: AcpError = {
+            type: "processing_error",
             code: "processing_error",
             message: error instanceof Error ? error.message : "Internal server error",
         };
@@ -260,7 +279,11 @@ checkoutSessionsRouter.post("/:id/complete", async (req: Request, res: Response)
     try {
         const { id } = req.params;
         if (Array.isArray(id)) {
-            const error: AcpError = { code: "invalid_request", message: "Invalid session ID" };
+            const error: AcpError = {
+                type: "invalid_request",
+                code: "invalid_request",
+                message: "Invalid session ID"
+            };
             return res.status(400).json(error);
         }
 
@@ -269,6 +292,7 @@ checkoutSessionsRouter.post("/:id/complete", async (req: Request, res: Response)
         const session = StorageService.getSession<CheckoutSession>(id);
         if (!session) {
             const error: AcpError = {
+                type: "invalid_request",
                 code: "invalid_request",
                 message: "Checkout session not found",
             };
@@ -277,6 +301,7 @@ checkoutSessionsRouter.post("/:id/complete", async (req: Request, res: Response)
 
         if (session.status === "completed") {
             const error: AcpError = {
+                type: "invalid_request",
                 code: "invalid_request",
                 message: "Checkout session already completed",
             };
@@ -285,6 +310,7 @@ checkoutSessionsRouter.post("/:id/complete", async (req: Request, res: Response)
 
         if (session.status === "canceled") {
             const error: AcpError = {
+                type: "invalid_request",
                 code: "invalid_request",
                 message: "Cannot complete a canceled checkout session",
             };
@@ -293,6 +319,7 @@ checkoutSessionsRouter.post("/:id/complete", async (req: Request, res: Response)
 
         if (!body.buyer || !body.payment_data) {
             const error: AcpError = {
+                type: "invalid_request",
                 code: "invalid_request",
                 message: "buyer and payment_data are required",
             };
@@ -331,10 +358,11 @@ checkoutSessionsRouter.post("/:id/complete", async (req: Request, res: Response)
 
         await WebhookService.sendWebhook(WebhookService.createOrderCreatedEvent(orderData));
 
-        return res.status(200).json(session);
+        return res.status(201).json(session);
     } catch (error) {
         console.error("Error completing checkout session:", error);
         const acpError: AcpError = {
+            type: "processing_error",
             code: "processing_error",
             message: error instanceof Error ? error.message : "Internal server error",
         };
@@ -350,13 +378,18 @@ checkoutSessionsRouter.post("/:id/cancel", async (req: Request, res: Response) =
     try {
         const { id } = req.params;
         if (Array.isArray(id)) {
-            const error: AcpError = { code: "invalid_request", message: "Invalid session ID" };
+            const error: AcpError = {
+                type: "invalid_request",
+                code: "invalid_request",
+                message: "Invalid session ID"
+            };
             return res.status(400).json(error);
         }
 
         const session = StorageService.getSession<CheckoutSession>(id);
         if (!session) {
             const error: AcpError = {
+                type: "invalid_request",
                 code: "invalid_request",
                 message: "Checkout session not found",
             };
@@ -365,6 +398,7 @@ checkoutSessionsRouter.post("/:id/cancel", async (req: Request, res: Response) =
 
         if (session.status === "completed" || session.status === "canceled") {
             const error: AcpError = {
+                type: "invalid_request",
                 code: "invalid_request",
                 message: "Cannot cancel a completed or already canceled session",
             };
@@ -378,6 +412,7 @@ checkoutSessionsRouter.post("/:id/cancel", async (req: Request, res: Response) =
     } catch (error) {
         console.error("Error canceling checkout session:", error);
         const acpError: AcpError = {
+            type: "processing_error",
             code: "processing_error",
             message: error instanceof Error ? error.message : "Internal server error",
         };

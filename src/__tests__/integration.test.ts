@@ -54,7 +54,7 @@ describe("ACP Adapter Integration Tests", () => {
                 .send({ product_id: "INVALID-ID" });
 
             expect(res.status).toBe(404);
-            expect(res.body.error).toContain("not found");
+            expect(res.body.message).toContain("not found");
         });
 
         it("should return 400 for missing product_id", async () => {
@@ -63,7 +63,7 @@ describe("ACP Adapter Integration Tests", () => {
                 .send({});
 
             expect(res.status).toBe(400);
-            expect(res.body.error).toBe("Missing product_id");
+            expect(res.body.message).toBe("Missing product_id");
         });
     });
 });
