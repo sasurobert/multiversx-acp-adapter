@@ -5,15 +5,17 @@ import crypto from "crypto";
 
 describe("Signature Middleware", () => {
     const TEST_SECRET = "test_webhook_secret_123";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mockReq: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mockRes: any;
     let mockNext: NextFunction;
 
     beforeEach(() => {
         process.env.ACP_SIGNING_SECRET = TEST_SECRET;
         mockRes = {
-            status: jest.fn().mockReturnThis() as any,
-            json: jest.fn().mockReturnThis() as any,
+            status: jest.fn().mockReturnThis() as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+            json: jest.fn().mockReturnThis() as any, // eslint-disable-line @typescript-eslint/no-explicit-any
         };
         mockNext = jest.fn();
     });

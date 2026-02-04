@@ -3,15 +3,17 @@ import { authMiddleware } from "../../middleware/auth";
 import { Request, Response, NextFunction } from "express";
 
 describe("Auth Middleware", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mockReq: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mockRes: any;
     let mockNext: NextFunction;
 
     beforeEach(() => {
         mockReq = { headers: {} };
         mockRes = {
-            status: jest.fn().mockReturnThis() as any,
-            json: jest.fn().mockReturnThis() as any,
+            status: jest.fn().mockReturnThis() as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+            json: jest.fn().mockReturnThis() as any, // eslint-disable-line @typescript-eslint/no-explicit-any
         };
         mockNext = jest.fn();
         // Reset environment for tests

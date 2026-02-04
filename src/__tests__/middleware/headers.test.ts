@@ -4,7 +4,8 @@ import express from "express";
 import { headersMiddleware } from "../../middleware/headers";
 
 describe("Headers Middleware", () => {
-    let app: express.Application;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let app: any;
 
     beforeEach(() => {
         app = express();

@@ -4,7 +4,8 @@ import express from "express";
 import { idempotencyMiddleware, IdempotencyStore } from "../../middleware/idempotency";
 
 describe("Idempotency Middleware", () => {
-    let app: express.Application;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let app: any;
 
     beforeEach(() => {
         IdempotencyStore.clear();

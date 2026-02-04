@@ -4,7 +4,7 @@ import { app } from "../app";
 
 // Mock the dependencies
 jest.mock("../logic/products", () => ({
-    fetchProducts: (jest.fn() as any).mockResolvedValue([
+    fetchProducts: (jest.fn() as any).mockResolvedValue([ // eslint-disable-line @typescript-eslint/no-explicit-any
         {
             product_id: "EGLD-123-01",
             title: "Test NFT",
