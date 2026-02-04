@@ -12,7 +12,7 @@ describe("Idempotency Middleware", () => {
         app = express();
         app.use(express.json());
         app.use(idempotencyMiddleware);
-        app.post("/test", (req: express.Request, res: express.Response) => {
+        app.post("/test", (req: any, res: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
             res.status(201).json({ id: `response_${Date.now()}`, data: req.body });
         });
     });

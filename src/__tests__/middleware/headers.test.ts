@@ -11,7 +11,7 @@ describe("Headers Middleware", () => {
         app = express();
         app.use(express.json());
         app.use(headersMiddleware);
-        app.post("/test", (req: express.Request, res: express.Response) => {
+        app.post("/test", (req: any, res: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
             res.status(200).json({
                 locale: (req as unknown as { locale: string }).locale,
                 requestId: (req as unknown as { requestId: string }).requestId,
