@@ -16,6 +16,8 @@ import {
 import { FulfillmentService } from "../logic/fulfillment";
 import { MessageService } from "../logic/messages";
 import { env } from "../utils/environment";
+import { getProductById, parsePrice } from "../logic/products";
+
 
 export const checkoutSessionsRouter = Router();
 
@@ -39,31 +41,47 @@ function calculateTotals(lineItems: LineItem[]): Total[] {
 
 /**
  * Helper: Create line items from request items
- * In a real implementation, you'd fetch product prices from a database
+ * Fetches actual product prices from the product catalog
  */
-function createLineItems(items: { id: string; quantity: number }[]): LineItem[] {
-    return items.map((item, index) => {
-        // Mock pricing - in production, fetch from product catalog
-        const baseAmount = 1000; // 10.00 in cents
+async function createLineItems(items: { id: string; quantity: number }[]): Promise<LineItem[]> {
+    const lineItems: LineItem[] = [];
+
+    for (const [index, item] of items.entries()) {
+        const product = await getProductById(item.id);
+
+        // Get price from product catalog, fallback to default if not found
+        let baseAmount: number;
+        if (product) {
+            baseAmount = parsePrice(product.price);
+        } else {
+            // Fallback for unknown products (e.g., in tests or when catalog unavailable)
+            logger.warn({ productId: item.id }, "Product not found in catalog, using default price");
+            baseAmount = 1000; // 10.00 in cents
+        }
+
+        const itemTotal = baseAmount * item.quantity;
         const discount = 0;
-        const subtotal = baseAmount * item.quantity - discount;
+        const subtotal = itemTotal - discount;
         const tax = Math.floor(subtotal * 0.1); // 10% tax
         const total = subtotal + tax;
 
-        return {
+        lineItems.push({
             id: `line_item_${index}`,
             item: {
                 id: item.id,
                 quantity: item.quantity,
             },
-            base_amount: baseAmount * item.quantity,
+            base_amount: itemTotal,
             discount,
             subtotal,
             tax,
             total,
-        };
-    });
+        });
+    }
+
+    return lineItems;
 }
+
 
 /**
  * POST /checkout_sessions
@@ -84,7 +102,7 @@ checkoutSessionsRouter.post("/", async (req: Request, res: Response) => {
         }
 
         const sessionId = `checkout_session_${randomUUID()}`;
-        const lineItems = createLineItems(body.items);
+        const lineItems = await createLineItems(body.items);
         const totals = calculateTotals(lineItems);
 
         // Determine status based on whether we have fulfillment address
@@ -177,7 +195,7 @@ checkoutSessionsRouter.post("/:id", async (req: Request, res: Response) => {
 
         // Update items if provided
         if (body.items) {
-            session.line_items = createLineItems(body.items);
+            session.line_items = await createLineItems(body.items);
             session.totals = calculateTotals(session.line_items);
         }
 

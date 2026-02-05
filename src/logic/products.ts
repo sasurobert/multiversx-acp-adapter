@@ -98,3 +98,29 @@ export async function fetchProducts(): Promise<AcpProduct[]> {
         }
     }));
 }
+
+/**
+ * Fetches a single product by its ID from the product catalog.
+ * Returns null if the product is not found.
+ */
+export async function getProductById(productId: string): Promise<AcpProduct | null> {
+    try {
+        const products = await fetchProducts();
+        return products.find(p => p.product_id === productId) || null;
+    } catch (error) {
+        logger.error({ error, productId }, "Failed to fetch product by ID");
+        return null;
+    }
+}
+
+/**
+ * Parses a price string (e.g., "10.5 EGLD") and converts to cents/smallest unit.
+ * Assumes 2 decimal places for USD-like conversion.
+ * For crypto, multiplies by 100 to get a comparable "cents" value.
+ */
+export function parsePrice(price: { amount: string; currency: string }): number {
+    const amount = parseFloat(price.amount);
+    if (isNaN(amount)) return 0;
+    // Convert to "cents" (multiply by 100 for 2 decimal precision)
+    return Math.round(amount * 100);
+}
