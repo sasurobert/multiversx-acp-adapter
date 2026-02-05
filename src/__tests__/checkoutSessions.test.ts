@@ -3,10 +3,38 @@ import request from "supertest";
 import { app } from "../app";
 import { StorageService } from "../logic/storage";
 
+import { getProductById, AcpProduct } from "../logic/products";
+
+jest.mock("../logic/products");
+const mockGetProductById = getProductById as jest.MockedFunction<typeof getProductById>;
+
 describe("Checkout Sessions API", () => {
     beforeEach(() => {
         // Clear storage before each test
         StorageService.sessions = {};
+
+        // Setup default mock response
+        mockGetProductById.mockImplementation(async (id: string) => {
+            if (id === "product_123") {
+                return {
+                    product_id: "product_123",
+                    title: "Product 123",
+                    description: "Description",
+                    price: { amount: "10.00", currency: "USD" },
+                    custom_attributes: { token_id: "123", nonce: 1 },
+                } as AcpProduct;
+            }
+            if (id === "product_456") {
+                return {
+                    product_id: "product_456",
+                    title: "Product 456",
+                    description: "Description",
+                    price: { amount: "20.00", currency: "USD" },
+                    custom_attributes: { token_id: "456", nonce: 1 },
+                } as AcpProduct;
+            }
+            return null;
+        });
     });
 
     describe("POST /checkout_sessions", () => {
@@ -55,6 +83,18 @@ describe("Checkout Sessions API", () => {
                 .expect(400);
 
             expect(response.body.code).toBe("invalid_request");
+        });
+
+        it("should return 500 if product is not found", async () => {
+            const response = await request(app)
+                .post("/checkout_sessions")
+                .send({
+                    items: [{ id: "invalid_product_id", quantity: 1 }]
+                })
+                .expect(500);
+
+            expect(response.body.code).toBe("processing_error");
+            expect(response.body.message).toContain("Product not found");
         });
     });
 

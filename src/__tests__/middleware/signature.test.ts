@@ -12,8 +12,8 @@ describe("Signature Middleware", () => {
     beforeEach(() => {
         process.env.ACP_SIGNING_SECRET = TEST_SECRET;
         mockRes = {
-            status: jest.fn().mockReturnThis() as jest.MockedFunction<any>,
-            json: jest.fn().mockReturnThis() as jest.MockedFunction<any>,
+            status: jest.fn().mockReturnThis() as unknown as Response["status"],
+            json: jest.fn().mockReturnThis() as unknown as Response["json"],
         };
         mockNext = jest.fn();
     });

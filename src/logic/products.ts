@@ -46,9 +46,10 @@ export async function fetchAcpProducts(): Promise<AcpProductFeed[]> {
         const response = await axios.get<MvxNft[]>(url, { params });
         const items = response.data;
 
-        return items.map((item: MvxNft) => {
+        return items.map((item: MvxNft): AcpProductFeed | null => {
             const tokenId = item.identifier.split("-").slice(0, 2).join("-");
-            const priceValue = item.price || "0";
+            const priceValue = item.price;
+            if (!priceValue) return null; // Skip items with no price
 
             return {
                 item_id: item.identifier,
@@ -60,7 +61,7 @@ export async function fetchAcpProducts(): Promise<AcpProductFeed[]> {
                 brand: env.SELLER_NAME,
                 price: `${priceValue} EGLD`,
                 image_url: item.url || item.media?.[0]?.url || "",
-                availability: "in_stock" as const,
+                availability: "in_stock",
                 group_id: tokenId,
                 listing_has_variations: item.nonce > 1,
                 seller_name: env.SELLER_NAME,
@@ -70,8 +71,8 @@ export async function fetchAcpProducts(): Promise<AcpProductFeed[]> {
                 store_country: env.STORE_COUNTRY,
                 additional_image_urls: item.media?.slice(1).map((m: { url: string }) => m.url).join(","),
                 condition: "new",
-            };
-        });
+            } as AcpProductFeed;
+        }).filter((item): item is AcpProductFeed => item !== null);
     } catch (error) {
         logger.error({ error }, "Failed to fetch products");
         return [];

@@ -50,14 +50,10 @@ async function createLineItems(items: { id: string; quantity: number }[]): Promi
         const product = await getProductById(item.id);
 
         // Get price from product catalog, fallback to default if not found
-        let baseAmount: number;
-        if (product) {
-            baseAmount = parsePrice(product.price);
-        } else {
-            // Fallback for unknown products (e.g., in tests or when catalog unavailable)
-            logger.warn({ productId: item.id }, "Product not found in catalog, using default price");
-            baseAmount = 1000; // 10.00 in cents
+        if (!product) {
+            throw new Error(`Product not found: ${item.id}`);
         }
+        const baseAmount = parsePrice(product.price);
 
         const itemTotal = baseAmount * item.quantity;
         const discount = 0;

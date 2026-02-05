@@ -16,11 +16,13 @@ jest.mock("../utils/logger", () => ({
     }
 }));
 
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+
 describe("Coverage Boost", () => {
 
     describe("Products Logic", () => {
         it("should handle error when fetching products fails", async () => {
-            (axios.get as any).mockRejectedValue(new Error("Network Error"));
+            mockedAxios.get.mockRejectedValue(new Error("Network Error"));
             const products = await fetchAcpProducts();
             expect(products).toEqual([]);
         });
@@ -30,7 +32,7 @@ describe("Coverage Boost", () => {
             const originalCollection = env.SHOWCASE_COLLECTION;
             env.SHOWCASE_COLLECTION = "TEST-1234";
 
-            (axios.get as any).mockResolvedValue({ data: [] });
+            mockedAxios.get.mockResolvedValue({ data: [] });
 
             await fetchAcpProducts();
 
@@ -45,7 +47,7 @@ describe("Coverage Boost", () => {
 
     describe("Relayer Logic Error Handling", () => {
         it("should return false when verifySignature fails (e.g. invalid base64)", () => {
-            const payload: any = {
+            const payload: Record<string, unknown> = {
                 sender: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu", // valid bech32
                 receiver: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu",
                 nonce: 1,
@@ -56,12 +58,13 @@ describe("Coverage Boost", () => {
 
             // This invalid address CAUSES the error in getRelayerAddress/Address constructor
             const invalidPayload = { ...payload, sender: "invalid-address" };
-            const result = RelayerService.verifySignature(invalidPayload);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = RelayerService.verifySignature(invalidPayload as any);
             expect(result).toBe(false);
         });
 
         it("should throw when broadcastRelayed fails", async () => {
-            const payload: any = {
+            const payload: Record<string, unknown> = {
                 sender: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu",
                 receiver: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu",
                 nonce: 1,
@@ -73,7 +76,8 @@ describe("Coverage Boost", () => {
             // Spy on packRelayedTransaction
             jest.spyOn(RelayerService, "packRelayedTransaction").mockRejectedValue(new Error("Packing failed"));
 
-            await expect(RelayerService.broadcastRelayed(payload)).rejects.toThrow("Packing failed");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await expect(RelayerService.broadcastRelayed(payload as any)).rejects.toThrow("Packing failed");
 
             jest.restoreAllMocks();
         });

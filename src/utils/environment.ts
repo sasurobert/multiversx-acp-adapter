@@ -101,7 +101,7 @@ export function createProvider() {
     const url = env.API_URL;
     const kind = url.includes('api') ? 'api' : 'proxy';
 
-    let entrypoint: any;
+    let entrypoint: MainnetEntrypoint | TestnetEntrypoint | DevnetEntrypoint;
     if (env.CHAIN_ID === '1') {
         entrypoint = new MainnetEntrypoint({ url, kind });
     } else if (env.CHAIN_ID === 'T') {

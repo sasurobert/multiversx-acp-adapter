@@ -157,8 +157,15 @@ export class RelayerService {
             const provider = createProvider();
 
             // 5. Simulation BEFORE broadcast (Crucial for Relayed V3)
+            interface SimulationResult {
+                status?: { status?: string };
+                raw?: { status?: string };
+                execution?: { result?: string; message?: string; gasConsumed?: number };
+                result?: { execution?: { result?: string; message?: string; gasConsumed?: number } };
+                error?: string;
+            }
             logger.info("[Relayer] Simulating transaction...");
-            const simulationResult = await provider.simulateTransaction(tx);
+            const simulationResult: SimulationResult = await provider.simulateTransaction(tx);
 
             // Robust Parser: Handle both flattened (API) and nested (Proxy/Gateway) structures
             const statusFromStatus = simulationResult?.status?.status;

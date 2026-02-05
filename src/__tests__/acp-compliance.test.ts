@@ -3,6 +3,19 @@ import request from "supertest";
 import { app } from "../app";
 import crypto from "crypto";
 
+jest.mock("../logic/products", () => ({
+    getProductById: jest.fn().mockImplementation(async (id: string) => {
+        return {
+            product_id: id,
+            title: `Mock Product ${id}`,
+            description: "Mock Description",
+            price: { amount: "1000", currency: "USD" }, // 10.00 USD
+            custom_attributes: { token_id: "TKN-123", nonce: 1 }
+        };
+    }),
+    parsePrice: jest.fn().mockReturnValue(1000)
+}));
+
 describe("ACP Compliance Integration", () => {
     const API_KEY = "test_api_key_123";
     const SIGNING_SECRET = "test_signing_secret_456";

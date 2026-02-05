@@ -16,7 +16,9 @@ jest.mock("../utils/environment", () => ({
         RELAYER_SECRET_KEY_SHARD_2: "2222222222222222222222222222222222222222222222222222222222222222"
     },
     createProvider: jest.fn().mockImplementation(() => ({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sendTransaction: jest.fn<any>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         simulateTransaction: jest.fn<any>().mockResolvedValue({
             execution: { result: "success" }
         })
@@ -25,7 +27,9 @@ jest.mock("../utils/environment", () => ({
 
 jest.mock("@multiversx/sdk-network-providers", () => ({
     ProxyNetworkProvider: jest.fn().mockImplementation(() => ({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sendTransaction: jest.fn<any>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         simulateTransaction: jest.fn<any>().mockResolvedValue({
             execution: { result: "success" }
         })
@@ -41,11 +45,10 @@ describe("Relayed Payment Integration (Multi-Shard)", () => {
     };
 
     // Expected Relayer Addresses based on mocks
-    const relayer0 = getAddressFromKey("0000000000000000000000000000000000000000000000000000000000000000"); // Shard 0? Check dynamically
     const relayer1 = getAddressFromKey("1111111111111111111111111111111111111111111111111111111111111111");
 
     // Helper to find a user address in a specific shard
-    const findUserInShard = (targetShard: number): { mnemonic: Mnemonic, address: string, key: any } => {
+    const findUserInShard = (targetShard: number): { mnemonic: Mnemonic, address: string, key: UserSecretKey } => {
         const computer = new AddressComputer();
         let attempts = 0;
         while (attempts < 1000) {
