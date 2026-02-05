@@ -11,12 +11,16 @@ jest.mock("../utils/environment", () => ({
         API_URL: "https://devnet-api.multiversx.com",
         CHAIN_ID: "D",
         GAS_LIMIT: 60000000,
-        // Mock keys for Shard 0, 1, 2
-        // These are just random 32-byte hex strings
         RELAYER_SECRET_KEY_SHARD_0: "0000000000000000000000000000000000000000000000000000000000000000",
         RELAYER_SECRET_KEY_SHARD_1: "1111111111111111111111111111111111111111111111111111111111111111",
         RELAYER_SECRET_KEY_SHARD_2: "2222222222222222222222222222222222222222222222222222222222222222"
-    }
+    },
+    createProvider: jest.fn().mockImplementation(() => ({
+        sendTransaction: jest.fn<any>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),
+        simulateTransaction: jest.fn<any>().mockResolvedValue({
+            execution: { result: "success" }
+        })
+    }))
 }));
 
 jest.mock("@multiversx/sdk-network-providers", () => ({

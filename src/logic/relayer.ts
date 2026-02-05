@@ -1,8 +1,7 @@
 import { UserVerifier, UserPublicKey, UserSigner, UserSecretKey } from "@multiversx/sdk-wallet";
 import { Address, Transaction, TransactionComputer, AddressComputer } from "@multiversx/sdk-core";
-import { ProxyNetworkProvider } from "@multiversx/sdk-network-providers";
 import { logger } from "../utils/logger";
-import { env } from "../utils/environment";
+import { env, createProvider } from "../utils/environment";
 
 export interface RelayedPayload {
     sender: string;
@@ -155,16 +154,29 @@ export class RelayerService {
 
         try {
             const tx = await this.packRelayedTransaction(payload);
-            const provider = new ProxyNetworkProvider(env.API_URL);
+            const provider = createProvider();
 
             // 5. Simulation BEFORE broadcast (Crucial for Relayed V3)
             logger.info("[Relayer] Simulating transaction...");
             const simulationResult = await provider.simulateTransaction(tx);
-            if (simulationResult?.execution?.result !== 'success') {
-                const msg = simulationResult?.execution?.message || 'Simulation failed';
-                logger.error({ error: msg }, "Simulation failed before broadcast");
-                throw new Error(`Simulation failed: ${msg}`);
+
+            // Robust Parser: Handle both flattened (API) and nested (Proxy/Gateway) structures
+            const execution = simulationResult?.execution || simulationResult?.result?.execution;
+            const resultStatus = execution?.result;
+
+            if (resultStatus !== 'success') {
+                const message = execution?.message || simulationResult?.error || 'Unknown error';
+                logger.error({
+                    error: message,
+                    simulationResult: JSON.stringify(simulationResult)
+                }, "Simulation failed before broadcast");
+                throw new Error(`Simulation failed: ${message}`);
             }
+
+            logger.info({
+                gasConsumed: execution?.gasConsumed,
+                result: resultStatus
+            }, "[Relayer] Simulation successful");
 
             // Real Broadcast
             const hash = await provider.sendTransaction(tx);

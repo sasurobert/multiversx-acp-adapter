@@ -1,0 +1,178 @@
+
+> multiversx-acp-adapter@1.0.0 test
+> jest
+
+(node:54764) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/__tests__/coverage_boost.test.ts
+  ● Console
+
+    console.log
+      [dotenv@17.2.3] injecting env (8) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+(node:54765) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/__tests__/webhooks_reliability.test.ts
+PASS src/__tests__/productFeed.test.ts
+(node:54759) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/__tests__/checkoutSessions.test.ts
+  ● Console
+
+    console.log
+      [dotenv@17.2.3] injecting env (8) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS src/__tests__/middleware/auth.test.ts
+  ● Console
+
+    console.log
+      [dotenv@17.2.3] injecting env (8) from .env -- tip: ⚙️  override existing env vars with { override: true }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+[13:01:57.524] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.524] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.531] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.532] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.535] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.535] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.537] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.537] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.539] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.539] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.540] [33mWARN[39m (54759): [36m⚠️  OPENAI_WEBHOOK_URL not configured, skipping webhook[39m
+[13:01:57.542] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.542] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.544] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.544] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.546] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.546] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.548] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.548] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.549] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.549] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.552] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.552] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.552] [33mWARN[39m (54759): [36m⚠️  OPENAI_WEBHOOK_URL not configured, skipping webhook[39m
+[13:01:57.554] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.554] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.557] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.557] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.558] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.558] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.561] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.561] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.561] [33mWARN[39m (54759): [36m⚠️  OPENAI_WEBHOOK_URL not configured, skipping webhook[39m
+[13:01:57.563] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.563] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.564] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.564] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.566] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.566] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.568] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.568] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.571] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.571] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.572] [33mWARN[39m (54759): [36m⚠️  OPENAI_WEBHOOK_URL not configured, skipping webhook[39m
+[13:01:57.573] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.573] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.575] [33mWARN[39m (54759): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:57.575] [33mWARN[39m (54759): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:57.616] [33mWARN[39m (54765): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+PASS src/__tests__/middleware/idempotency.test.ts
+PASS src/__tests__/middleware/signature.test.ts
+  ● Console
+
+    console.log
+      [dotenv@17.2.3] injecting env (8) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS src/__tests__/storage.test.ts
+PASS src/__tests__/negotiation.test.ts
+PASS src/__tests__/validation.test.ts
+PASS src/__tests__/escrow.test.ts
+PASS src/__tests__/middleware/headers.test.ts
+(node:54763) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/__tests__/relayer.test.ts
+(node:54761) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/__tests__/integration.test.ts
+(node:54762) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/__tests__/delegatedPayment.test.ts
+  ● Console
+
+    console.log
+      [dotenv@17.2.3] injecting env (8) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+(node:54760) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/__tests__/app.test.ts
+(node:54758) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/__tests__/acp-compliance.test.ts
+  ● Console
+
+    console.log
+      [dotenv@17.2.3] injecting env (8) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+[13:01:58.955] [33mWARN[39m (54758): [36m⚠️  OPENAI_WEBHOOK_URL not configured, skipping webhook[39m
+[13:01:58.958] [33mWARN[39m (54758): [36m⚠️  OPENAI_WEBHOOK_URL not configured, skipping webhook[39m
+(node:54757) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/__tests__/relayed_integration.test.ts
+  ● Console
+
+    console.log
+      Testing with User Shard: 1, Address: erd1mfecpkkckjmwd65hxyz30enn65jk7kgln3wpm9y82aap45fxqeysu0d9zl
+
+      at Object.<anonymous> (src/__tests__/relayed_integration.test.ts:69:17)
+
+    console.log
+      Expected Relayer Address (Shard 1 Key): erd16p9tyvn59w62kwsndz75v90yumgzyj4hrgqkhtu9yz3n9jthsumss5nuu7
+
+      at Object.<anonymous> (src/__tests__/relayed_integration.test.ts:70:17)
+
+  ● Relayed Payment Integration (Multi-Shard) › should use Shard 1 Relayer for a Shard 1 Sender
+
+    expected 200 "OK", got 500 "Internal Server Error"
+
+      107 |             .post("/capture")
+      108 |             .send({ payment_token: paymentToken })
+    > 109 |             .expect(200);
+          |              ^
+      110 |
+      111 |         expect(res2.body.status).toBe("processing");
+      112 |         expect(res2.body.tx_hash).toMatch(/^0x[a-f0-9]+$/);
+
+      at Object.<anonymous> (src/__tests__/relayed_integration.test.ts:109:14)
+      ----
+      at Test._assertStatus (node_modules/supertest/lib/test.js:309:14)
+      at node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (node_modules/supertest/lib/test.js:195:23)
+      at localAssert (node_modules/supertest/lib/test.js:138:14)
+      at Server.<anonymous> (node_modules/supertest/lib/test.js:152:11)
+
+Test Suites: 1 failed, 17 passed, 18 total
+Tests:       1 failed, 61 passed, 62 total
+Snapshots:   0 total
+Time:        3.198 s, estimated 5 s
+Ran all test suites.
+[13:01:59.073] [33mWARN[39m (54757): [36m⚠️ ACP_API_KEY not configured, skipping authentication[39m
+[13:01:59.073] [33mWARN[39m (54757): [36m⚠️ ACP_SIGNING_SECRET not configured, skipping signature verification[39m
+[13:01:59.081] [32mINFO[39m (54757): [36m[Relayer] Broadcasting tx[39m
+    [35msender[39m: "erd1mfecpkkckjmwd65hxyz30enn65jk7kgln3wpm9y82aap45fxqeysu0d9zl"
+    [35mreceiver[39m: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu"
+[13:01:59.082] [31mERROR[39m (54757): [36mBroadcast failed[39m
+    error: {}

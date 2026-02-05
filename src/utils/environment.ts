@@ -88,4 +88,27 @@ function validateEnv(): Environment {
     };
 }
 
+import { DevnetEntrypoint, MainnetEntrypoint, TestnetEntrypoint } from "@multiversx/sdk-core";
+
+// ... (existing validateEnv and Environment interface)
+
 export const env = validateEnv();
+
+/**
+ * Creates a Network Provider using the modern SDK Entrypoint pattern.
+ */
+export function createProvider() {
+    const url = env.API_URL;
+    const kind = url.includes('api') ? 'api' : 'proxy';
+
+    let entrypoint: any;
+    if (env.CHAIN_ID === '1') {
+        entrypoint = new MainnetEntrypoint({ url, kind });
+    } else if (env.CHAIN_ID === 'T') {
+        entrypoint = new TestnetEntrypoint({ url, kind });
+    } else {
+        entrypoint = new DevnetEntrypoint({ url, kind });
+    }
+
+    return entrypoint.createNetworkProvider();
+}
