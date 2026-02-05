@@ -11,6 +11,10 @@ export interface RelayedPayload {
     value: string; // Atomic units
     data: string; // Base64
     signature: string; // Hex
+    gasLimit?: number;
+    chainId?: string;
+    version?: number;
+    options?: number;
 }
 
 export class RelayerService {
@@ -71,10 +75,12 @@ export class RelayerService {
                 value: BigInt(payload.value),
                 receiver: new Address(payload.receiver),
                 sender: new Address(payload.sender),
-                gasLimit: BigInt(env.GAS_LIMIT),
-                chainID: env.CHAIN_ID,
+                gasLimit: BigInt(payload.gasLimit || env.GAS_LIMIT),
+                chainID: payload.chainId || env.CHAIN_ID,
                 data: payload.data ? Buffer.from(payload.data, 'base64') : undefined,
-                relayer: new Address(relayerAddrStr)
+                relayer: new Address(relayerAddrStr),
+                version: payload.version,
+                options: payload.options
             });
 
             // SDK v15 Serialization
@@ -108,10 +114,12 @@ export class RelayerService {
             value: BigInt(payload.value),
             receiver: new Address(payload.receiver),
             sender: new Address(payload.sender),
-            gasLimit: BigInt(env.GAS_LIMIT),
-            chainID: env.CHAIN_ID,
+            gasLimit: BigInt(payload.gasLimit || env.GAS_LIMIT),
+            chainID: payload.chainId || env.CHAIN_ID,
             data: payload.data ? Buffer.from(payload.data, 'base64') : undefined,
-            relayer: relayerAddress
+            relayer: relayerAddress,
+            version: payload.version,
+            options: payload.options
         });
 
         // 3. Apply Sender's Signature
