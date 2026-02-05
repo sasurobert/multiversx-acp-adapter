@@ -112,7 +112,7 @@ export class RelayerService {
     static async packRelayedTransaction(payload: RelayedPayload): Promise<Transaction> {
         // 1. Identify correct Relayer for this Sender's Shard
         const relayerAddrStr = this.getRelayerAddress(payload.sender);
-        const relayerAddress = new Address(relayerAddrStr);
+
 
         // 2. Reconstruct Transaction exactly as the User signed it
         const tx = new Transaction({
