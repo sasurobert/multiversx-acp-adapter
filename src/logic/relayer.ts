@@ -15,6 +15,7 @@ export interface RelayedPayload {
     chainId?: string;
     version?: number;
     options?: number;
+    relayer?: string;
 }
 
 export class RelayerService {
@@ -78,10 +79,16 @@ export class RelayerService {
                 gasLimit: BigInt(payload.gasLimit || env.GAS_LIMIT),
                 chainID: payload.chainId || env.CHAIN_ID,
                 data: payload.data ? Buffer.from(payload.data, 'base64') : undefined,
-                relayer: new Address(relayerAddrStr),
+                relayer: new Address(payload.relayer || relayerAddrStr),
                 version: payload.version,
                 options: payload.options
             });
+
+            // CHECK: If user provided a relayer, it MUST match our shard-aware address
+            if (payload.relayer && payload.relayer !== relayerAddrStr) {
+                logger.error({ provided: payload.relayer, expected: relayerAddrStr }, "Relayer address mismatch for shard");
+                return false;
+            }
 
             // SDK v15 Serialization
             const computer = new TransactionComputer();
@@ -117,7 +124,7 @@ export class RelayerService {
             gasLimit: BigInt(payload.gasLimit || env.GAS_LIMIT),
             chainID: payload.chainId || env.CHAIN_ID,
             data: payload.data ? Buffer.from(payload.data, 'base64') : undefined,
-            relayer: relayerAddress,
+            relayer: new Address(payload.relayer || relayerAddrStr),
             version: payload.version,
             options: payload.options
         });
@@ -148,10 +155,18 @@ export class RelayerService {
 
         try {
             const tx = await this.packRelayedTransaction(payload);
-
-            // Real Broadcast
             const provider = new ProxyNetworkProvider(env.API_URL);
 
+            // 5. Simulation BEFORE broadcast (Crucial for Relayed V3)
+            logger.info("[Relayer] Simulating transaction...");
+            const simulationResult = await provider.simulateTransaction(tx);
+            if (simulationResult?.execution?.result !== 'success') {
+                const msg = simulationResult?.execution?.message || 'Simulation failed';
+                logger.error({ error: msg }, "Simulation failed before broadcast");
+                throw new Error(`Simulation failed: ${msg}`);
+            }
+
+            // Real Broadcast
             const hash = await provider.sendTransaction(tx);
             logger.info({ hash }, "[Relayer] Transaction sent");
             return hash;
