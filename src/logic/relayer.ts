@@ -177,16 +177,16 @@ export class RelayerService {
                 const message = execution?.message || simulationResult?.error || 'Unknown error';
                 logger.error({
                     error: message,
-                    simulationResult: JSON.stringify(simulationResult),
-                    tx: JSON.stringify(tx.toPlainObject())
+                    simulationResult: JSON.stringify(simulationResult, (_, v) => typeof v === 'bigint' ? v.toString() : v),
+                    tx: JSON.stringify(tx.toPlainObject(), (_, v) => typeof v === 'bigint' ? v.toString() : v)
                 }, "[Relayer] Simulation failed before broadcast");
                 throw new Error(`Simulation failed: ${message}`);
             }
 
             logger.info({
-                gasConsumed: execution?.gasConsumed,
+                gasConsumed: execution?.gasConsumed?.toString(),
                 result: resultStatus,
-                simulationRaw: JSON.stringify(simulationResult)
+                simulationRaw: JSON.stringify(simulationResult, (_, v) => typeof v === 'bigint' ? v.toString() : v)
             }, "[Relayer] Simulation successful");
 
             // Real Broadcast
