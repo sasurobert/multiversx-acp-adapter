@@ -15,6 +15,18 @@ jest.mock("../utils/environment", () => ({
         RELAYER_SECRET_KEY_SHARD_1: "1111111111111111111111111111111111111111111111111111111111111111",
         RELAYER_SECRET_KEY_SHARD_2: "2222222222222222222222222222222222222222222222222222222222222222"
     },
+    createEntrypoint: jest.fn().mockImplementation(() => ({
+        createNetworkProvider: jest.fn().mockImplementation(() => ({
+            sendTransaction: jest.fn<any>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),
+            simulateTransaction: jest.fn<any>().mockResolvedValue({
+                execution: { result: "success" }
+            })
+        })),
+        sendTransaction: jest.fn<any>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),
+        simulateTransaction: jest.fn<any>().mockResolvedValue({
+            execution: { result: "success" }
+        })
+    })),
     createProvider: jest.fn().mockImplementation(() => ({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sendTransaction: jest.fn<any>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),

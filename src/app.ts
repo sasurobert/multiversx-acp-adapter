@@ -114,14 +114,20 @@ app.post("/checkout", async (req: Request, res: Response) => {
 
         const proposal = job.proposal;
 
-        // Build Deposit Payload
-        const data = EscrowService.buildDepositPayload({
+        // Build Deposit Payload using ABI-based logic
+        const data = await EscrowService.buildDepositPayload({
             job_id: proposal.job_id,
             token: proposal.token,
             amount: proposal.price,
-            vendor: env.VENDOR_ADDRESS,
-            poa_hash: proposal.vendor_signature.slice(0, 64) // Using signature prefix or a proper hash as PoA
+            agent_nonce: 0, // Default for new protocol initialization
+            service_id: "default",
+            validator_address: env.ESCROW_ADDRESS
         });
+
+        // Convert base64 from ABI factory to hex for the response if needed, 
+        // but ACP usually expects base64 or hex depending on the client. 
+        // Here we'll convert to hex to match previous behavior if expected.
+        const dataHex = Buffer.from(data, 'base64').toString('hex');
 
         res.json({
             status: "requires_action",
@@ -131,7 +137,7 @@ app.post("/checkout", async (req: Request, res: Response) => {
                 receiver: env.ESCROW_ADDRESS,
                 value: "0", // Access value from ESDTTransfer or direct EGLD
                 gasLimit: env.GAS_LIMIT,
-                data: data
+                data: dataHex
             }
         });
         return;

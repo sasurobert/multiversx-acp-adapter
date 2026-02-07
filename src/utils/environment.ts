@@ -95,20 +95,25 @@ import { DevnetEntrypoint, MainnetEntrypoint, TestnetEntrypoint } from "@multive
 export const env = validateEnv();
 
 /**
- * Creates a Network Provider using the modern SDK Entrypoint pattern.
+ * Creates a Network Entrypoint using the modern SDK pattern.
  */
-export function createProvider() {
+export function createEntrypoint(): MainnetEntrypoint | TestnetEntrypoint | DevnetEntrypoint {
     const url = env.API_URL;
     const kind = url.includes('api') ? 'api' : 'proxy';
 
-    let entrypoint: MainnetEntrypoint | TestnetEntrypoint | DevnetEntrypoint;
     if (env.CHAIN_ID === '1') {
-        entrypoint = new MainnetEntrypoint({ url, kind });
+        return new MainnetEntrypoint({ url, kind });
     } else if (env.CHAIN_ID === 'T') {
-        entrypoint = new TestnetEntrypoint({ url, kind });
+        return new TestnetEntrypoint({ url, kind });
     } else {
-        entrypoint = new DevnetEntrypoint({ url, kind });
+        return new DevnetEntrypoint({ url, kind });
     }
+}
 
+/**
+ * Creates a Network Provider using the modern SDK Entrypoint pattern.
+ */
+export function createProvider() {
+    const entrypoint = createEntrypoint();
     return entrypoint.createNetworkProvider();
 }
