@@ -10,8 +10,17 @@ jest.mock("../utils/environment", () => ({
         MARKETPLACE_ADDRESS: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu",
         CHAIN_ID: "D",
         GAS_LIMIT: 60000000,
-        VENDOR_SECRET_KEY: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
-    }
+        VENDOR_SECRET_KEY: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        WALLET_URL: "https://testnet-wallet.multiversx.com"
+    },
+    createEntrypoint: jest.fn().mockReturnValue({
+        createSmartContractTransactionsFactory: jest.fn().mockReturnValue({
+            createTransactionForExecute: jest.fn().mockImplementation(async () => ({
+                data: Buffer.from("deposit@..."),
+                toPlainObject: () => ({})
+            }))
+        })
+    })
 }));
 
 describe("App Integration Tests", () => {
@@ -70,8 +79,8 @@ describe("App Integration Tests", () => {
 
         expect(res.status).toBe(200);
         expect(res.body.status).toBe("requires_action");
-        // Expect deposit@...
-        expect(res.body.next_action.data).toMatch(/^deposit@/);
+        // Expect hex of "deposit@" -> "6465706f73697440"
+        expect(res.body.next_action.data).toMatch(/^6465706f73697440/);
         expect(res.body.next_action.receiver).toBeDefined();
     });
 

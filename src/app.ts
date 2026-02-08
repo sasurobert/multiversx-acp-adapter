@@ -118,6 +118,7 @@ app.post("/checkout", async (req: Request, res: Response) => {
         const data = await EscrowService.buildDepositPayload({
             job_id: proposal.job_id,
             token: proposal.token,
+            token_nonce: 0, // Default to 0 for EGLD/Fungible ESDT
             amount: proposal.price,
             agent_nonce: 0, // Default for new protocol initialization
             service_id: "default",
