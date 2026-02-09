@@ -1,5 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { fetchProducts } from "./logic/products";
 import { logger } from "./utils/logger";
 import { env } from "./utils/environment";
@@ -15,8 +17,19 @@ import { headersMiddleware } from "./middleware/headers";
 
 export const app = express();
 
+app.use(helmet());
+app.use(rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+}));
 app.use(cors());
 app.use(express.json());
+
+app.get("/health", (req: Request, res: Response) => {
+    res.json({ status: "ok" });
+});
 
 // Initialize Storage
 StorageService.init();
