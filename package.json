@@ -23,6 +23,7 @@
     "@types/node": "^25.0.8",
     "@types/uuid": "^10.0.0",
     "axios": "^1.13.2",
+    "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "pino": "^10.3.0",
@@ -32,6 +33,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/jest": "^30.0.0",
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.54.0",

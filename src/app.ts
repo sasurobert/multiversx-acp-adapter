@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import cors from "cors";
 import { fetchProducts } from "./logic/products";
 import { logger } from "./utils/logger";
 import { env } from "./utils/environment";
@@ -14,6 +15,7 @@ import { headersMiddleware } from "./middleware/headers";
 
 export const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 // Initialize Storage

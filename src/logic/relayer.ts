@@ -1,7 +1,29 @@
 import { UserVerifier, UserPublicKey, UserSigner, UserSecretKey } from "@multiversx/sdk-wallet";
 import { Address, Transaction, TransactionComputer, AddressComputer } from "@multiversx/sdk-core";
 import { logger } from "../utils/logger";
-import { env, createProvider, createEntrypoint } from "../utils/environment";
+import { env, createEntrypoint } from "../utils/environment";
+
+interface ISimulationResult {
+    status?: { status?: string };
+    raw?: {
+        status?: string;
+        receiverShard?: { status?: string };
+        senderShard?: { status?: string };
+    };
+    execution?: {
+        result?: string;
+        message?: string;
+        gasConsumed?: number;
+    };
+    result?: {
+        execution?: {
+            result?: string;
+            message?: string;
+            gasConsumed?: number;
+        };
+    };
+    error?: string;
+}
 
 export interface RelayedPayload {
     sender: string;
@@ -155,19 +177,23 @@ export class RelayerService {
         try {
             const tx = await this.packRelayedTransaction(payload);
             const entrypoint = createEntrypoint();
+            const broadcastProvider = entrypoint as unknown as {
+                simulateTransaction(tx: Transaction): Promise<ISimulationResult>;
+                sendTransaction(tx: Transaction): Promise<string>;
+            };
 
             // 5. Simulation BEFORE broadcast (Crucial for Relayed V3)
             logger.info("[Relayer] Simulating transaction...");
-            const simulationResult = await (entrypoint as any).simulateTransaction(tx);
+            const simulationResult: ISimulationResult = await broadcastProvider.simulateTransaction(tx);
 
             // Robust Parser: Handle both flattened (API) and nested (Proxy/Gateway) structures
-            const statusFromStatus = (simulationResult as any)?.status?.status;
-            const statusFromRaw = (simulationResult as any)?.raw?.status;
-            const execution = (simulationResult as any)?.execution || (simulationResult as any)?.result?.execution;
+            const statusFromStatus = simulationResult?.status?.status;
+            const statusFromRaw = simulationResult?.raw?.status;
+            const execution = simulationResult?.execution || simulationResult?.result?.execution;
             const resultStatus = statusFromStatus || statusFromRaw || execution?.result;
 
             if (resultStatus !== 'success') {
-                const message = execution?.message || (simulationResult as any)?.error || 'Unknown error';
+                const message = execution?.message || simulationResult?.error || 'Unknown error';
                 logger.error({
                     error: message,
                     simulationResult: JSON.stringify(simulationResult, (_, v) => typeof v === 'bigint' ? v.toString() : v),
@@ -183,7 +209,7 @@ export class RelayerService {
             }, "[Relayer] Simulation successful");
 
             // Real Broadcast
-            const hash = await (entrypoint as any).sendTransaction(tx);
+            const hash = await broadcastProvider.sendTransaction(tx);
             logger.info({ hash }, "[Relayer] Transaction sent");
             return hash;
         } catch (e) {

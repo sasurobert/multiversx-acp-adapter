@@ -1,7 +1,9 @@
-import { Address, Abi, DevnetEntrypoint, Token, TokenTransfer } from "@multiversx/sdk-core";
+import { Address, Abi, Token, TokenTransfer } from "@multiversx/sdk-core";
 import fs from "fs";
 import path from "path";
 import { createEntrypoint } from "../utils/environment";
+
+const ESCROW_GAS_LIMIT = 60_000_000n;
 
 export interface DepositParams {
     job_id: string;
@@ -39,7 +41,7 @@ export class EscrowService {
             return await factory.createTransactionForExecute(senderAddress, {
                 contract: contractAddress,
                 function: "init_job_with_payment",
-                gasLimit: 60_000_000n,
+                gasLimit: ESCROW_GAS_LIMIT,
                 arguments: [
                     Buffer.from(params.job_id),
                     BigInt(params.agent_nonce),
@@ -51,7 +53,7 @@ export class EscrowService {
             return await factory.createTransactionForExecute(senderAddress, {
                 contract: contractAddress,
                 function: "init_job_with_payment",
-                gasLimit: 60_000_000n,
+                gasLimit: ESCROW_GAS_LIMIT,
                 arguments: [
                     Buffer.from(params.job_id),
                     BigInt(params.agent_nonce),

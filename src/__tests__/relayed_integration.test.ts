@@ -17,21 +17,19 @@ jest.mock("../utils/environment", () => ({
     },
     createEntrypoint: jest.fn().mockImplementation(() => ({
         createNetworkProvider: jest.fn().mockImplementation(() => ({
-            sendTransaction: jest.fn<any>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),
-            simulateTransaction: jest.fn<any>().mockResolvedValue({
+            sendTransaction: jest.fn<() => Promise<string>>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),
+            simulateTransaction: jest.fn<() => Promise<{ execution: { result: string } }>>().mockResolvedValue({
                 execution: { result: "success" }
             })
         })),
-        sendTransaction: jest.fn<any>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),
-        simulateTransaction: jest.fn<any>().mockResolvedValue({
+        sendTransaction: jest.fn<() => Promise<string>>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),
+        simulateTransaction: jest.fn<() => Promise<{ execution: { result: string } }>>().mockResolvedValue({
             execution: { result: "success" }
         })
     })),
     createProvider: jest.fn().mockImplementation(() => ({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sendTransaction: jest.fn<any>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        simulateTransaction: jest.fn<any>().mockResolvedValue({
+        sendTransaction: jest.fn<() => Promise<string>>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),
+        simulateTransaction: jest.fn<() => Promise<{ execution: { result: string } }>>().mockResolvedValue({
             execution: { result: "success" }
         })
     }))
@@ -39,10 +37,8 @@ jest.mock("../utils/environment", () => ({
 
 jest.mock("@multiversx/sdk-network-providers", () => ({
     ProxyNetworkProvider: jest.fn().mockImplementation(() => ({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sendTransaction: jest.fn<any>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        simulateTransaction: jest.fn<any>().mockResolvedValue({
+        sendTransaction: jest.fn<() => Promise<string>>().mockResolvedValue("0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12"),
+        simulateTransaction: jest.fn<() => Promise<{ execution: { result: string } }>>().mockResolvedValue({
             execution: { result: "success" }
         })
     }))
@@ -85,8 +81,8 @@ describe("Relayed Payment Integration (Multi-Shard)", () => {
         const user = findUserInShard(shard);
         const userSigner = new UserSigner(user.key);
 
-        console.log(`Testing with User Shard: ${shard}, Address: ${user.address}`);
-        console.log(`Expected Relayer Address (Shard 1 Key): ${relayer1}`);
+        // User Shard: ${shard}, Address: ${user.address}
+        // Expected Relayer Address (Shard 1 Key): ${relayer1}
 
         // 1. Agent constructs Inner Transaction (Gasless)
         // MUST set relayer to the expected Shard 1 relayer
