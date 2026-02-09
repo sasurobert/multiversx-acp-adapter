@@ -10,7 +10,7 @@
             "llvmVersion": "21.1"
         },
         "contractCrate": {
-            "name": "validation-registry",
+            "name": "reputation-registry",
             "version": "0.1.0"
         },
         "framework": {
@@ -18,11 +18,15 @@
             "version": "0.64.1"
         }
     },
-    "name": "ValidationRegistry",
+    "name": "ReputationRegistry",
     "constructor": {
         "inputs": [
             {
-                "name": "identity_registry_address",
+                "name": "validation_contract_address",
+                "type": "Address"
+            },
+            {
+                "name": "identity_contract_address",
                 "type": "Address"
             }
         ],
@@ -34,11 +38,8 @@
     },
     "endpoints": [
         {
-            "name": "init_job",
+            "name": "submit_feedback",
             "mutability": "mutable",
-            "payableInTokens": [
-                "*"
-            ],
             "inputs": [
                 {
                     "name": "job_id",
@@ -49,15 +50,14 @@
                     "type": "u64"
                 },
                 {
-                    "name": "service_id",
-                    "type": "optional<u32>",
-                    "multi_arg": true
+                    "name": "rating",
+                    "type": "BigUint"
                 }
             ],
             "outputs": []
         },
         {
-            "name": "submit_proof",
+            "name": "authorize_feedback",
             "mutability": "mutable",
             "inputs": [
                 {
@@ -65,38 +65,79 @@
                     "type": "bytes"
                 },
                 {
-                    "name": "proof",
-                    "type": "bytes"
+                    "name": "client",
+                    "type": "Address"
                 }
             ],
             "outputs": []
         },
         {
-            "name": "verify_job",
-            "onlyOwner": true,
+            "name": "append_response",
             "mutability": "mutable",
             "inputs": [
                 {
                     "name": "job_id",
                     "type": "bytes"
+                },
+                {
+                    "name": "response_uri",
+                    "type": "bytes"
                 }
             ],
             "outputs": []
         },
         {
-            "name": "clean_old_jobs",
-            "mutability": "mutable",
+            "name": "get_reputation_score",
+            "mutability": "readonly",
             "inputs": [
                 {
-                    "name": "job_ids",
-                    "type": "variadic<bytes>",
-                    "multi_arg": true
+                    "name": "agent_nonce",
+                    "type": "u64"
                 }
             ],
-            "outputs": []
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
         },
         {
-            "name": "is_job_verified",
+            "name": "get_total_jobs",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "agent_nonce",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "get_validation_contract_address",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "get_identity_contract_address",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "has_given_feedback",
             "mutability": "readonly",
             "inputs": [
                 {
@@ -111,7 +152,26 @@
             ]
         },
         {
-            "name": "get_job_data",
+            "name": "is_feedback_authorized",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "job_id",
+                    "type": "bytes"
+                },
+                {
+                    "name": "client",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "get_agent_response",
             "mutability": "readonly",
             "inputs": [
                 {
@@ -121,13 +181,24 @@
             ],
             "outputs": [
                 {
-                    "type": "optional<JobData>",
-                    "multi_result": true
+                    "type": "bytes"
                 }
             ]
         },
         {
-            "name": "set_identity_registry_address",
+            "name": "set_identity_contract_address",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "set_validation_contract_address",
             "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
@@ -141,69 +212,21 @@
     ],
     "events": [
         {
-            "identifier": "jobVerified",
+            "identifier": "reputationUpdated",
             "inputs": [
-                {
-                    "name": "job_id",
-                    "type": "bytes",
-                    "indexed": true
-                },
                 {
                     "name": "agent_nonce",
                     "type": "u64",
                     "indexed": true
                 },
                 {
-                    "name": "status",
-                    "type": "JobStatus"
+                    "name": "new_score",
+                    "type": "BigUint"
                 }
             ]
         }
     ],
     "esdtAttributes": [],
     "hasCallback": false,
-    "types": {
-        "JobData": {
-            "type": "struct",
-            "fields": [
-                {
-                    "name": "status",
-                    "type": "JobStatus"
-                },
-                {
-                    "name": "proof",
-                    "type": "bytes"
-                },
-                {
-                    "name": "employer",
-                    "type": "Address"
-                },
-                {
-                    "name": "creation_timestamp",
-                    "type": "u64"
-                },
-                {
-                    "name": "agent_nonce",
-                    "type": "u64"
-                }
-            ]
-        },
-        "JobStatus": {
-            "type": "enum",
-            "variants": [
-                {
-                    "name": "New",
-                    "discriminant": 0
-                },
-                {
-                    "name": "Pending",
-                    "discriminant": 1
-                },
-                {
-                    "name": "Verified",
-                    "discriminant": 2
-                }
-            ]
-        }
-    }
+    "types": {}
 }

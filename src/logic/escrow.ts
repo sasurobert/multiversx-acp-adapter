@@ -16,7 +16,11 @@ export interface DepositParams {
 }
 
 const abiPath = path.join(__dirname, "../abis/validation-registry.abi.json");
-const validationAbi = Abi.create(JSON.parse(fs.readFileSync(abiPath, "utf-8")));
+// Patch ABI types that sdk-core TypeMapper doesn't recognize
+const rawAbi = fs.readFileSync(abiPath, "utf-8")
+    .replace(/"TokenId"/g, '"TokenIdentifier"')
+    .replace(/"NonZeroBigUint"/g, '"BigUint"');
+const validationAbi = Abi.create(JSON.parse(rawAbi));
 
 export class EscrowService {
     /**
