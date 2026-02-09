@@ -10,14 +10,22 @@ It bridges the gap between OpenAI Agents and the MultiversX Blockchain by provid
 *   **Wallet Handoff**: Returns the `use_dapp_wallet` action, instructing the Agent to hand off the signing process to the user's secure crypto wallet.
 *   **Delegated Payments (V2)**: Supports "Gasless" transactions via `POST /delegate_payment`, where the Adapter acts as a Relayer. See [V2 Spec](docs/SPEC_V2_RELAYED.md).
 
-## Installation
+## Quick Start
 
 ```bash
-git clone https://github.com/multiversx/multiversx-acp-adapter.git
+git clone https://github.com/sasurobert/multiversx-acp-adapter.git
 cd multiversx-acp-adapter
-npm install
-npm run build
+chmod +x setup.sh && ./setup.sh
 ```
+
+The setup script installs dependencies, creates a default `.env`, builds the project, and runs tests.
+
+### Prerequisites
+
+| Tool | Version | Required |
+|------|---------|----------|
+| Node.js | v18+ | Yes |
+| npm | v9+ | Yes |
 
 ## Configuration
 
