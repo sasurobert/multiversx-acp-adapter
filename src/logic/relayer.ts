@@ -2,6 +2,7 @@ import { UserVerifier, UserPublicKey, UserSigner, UserSecretKey } from "@multive
 import { Address, Transaction, TransactionComputer, AddressComputer } from "@multiversx/sdk-core";
 import { logger } from "../utils/logger";
 import { env, createEntrypoint } from "../utils/environment";
+import { parseSimulationResult } from "../utils/simulationParser";
 
 interface ISimulationResult {
     status?: { status?: string };
@@ -186,25 +187,19 @@ export class RelayerService {
             logger.info("[Relayer] Simulating transaction...");
             const simulationResult: ISimulationResult = await broadcastProvider.simulateTransaction(tx);
 
-            // Robust Parser: Handle both flattened (API) and nested (Proxy/Gateway) structures
-            const statusFromStatus = simulationResult?.status?.status;
-            const statusFromRaw = simulationResult?.raw?.status;
-            const execution = simulationResult?.execution || simulationResult?.result?.execution;
-            const resultStatus = statusFromStatus || statusFromRaw || execution?.result;
+            const { success, errorMessage } = parseSimulationResult(simulationResult as unknown as Record<string, any>);
 
-            if (resultStatus !== 'success') {
-                const message = execution?.message || simulationResult?.error || 'Unknown error';
+            if (!success) {
                 logger.error({
-                    error: message,
+                    error: errorMessage,
                     simulationResult: JSON.stringify(simulationResult, (_, v) => typeof v === 'bigint' ? v.toString() : v),
                     tx: JSON.stringify(tx.toPlainObject(), (_, v) => typeof v === 'bigint' ? v.toString() : v)
                 }, "[Relayer] Simulation failed before broadcast");
-                throw new Error(`Simulation failed: ${message}`);
+                throw new Error(`Simulation failed: ${errorMessage}`);
             }
 
             logger.info({
-                gasConsumed: execution?.gasConsumed?.toString(),
-                result: resultStatus,
+                result: 'success',
                 simulationRaw: JSON.stringify(simulationResult, (_, v) => typeof v === 'bigint' ? v.toString() : v)
             }, "[Relayer] Simulation successful");
 
