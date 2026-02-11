@@ -135,9 +135,9 @@ app.post("/checkout", async (req: Request, res: Response) => {
             token: proposal.token,
             token_nonce: 0, // Default to 0 for EGLD/Fungible ESDT
             amount: proposal.price,
-            agent_nonce: 0, // Default for new protocol initialization
-            service_id: "default",
-            validator_address: env.ESCROW_ADDRESS
+            receiver: env.VENDOR_ADDRESS, // Agent/worker who will receive the funds
+            poa_hash: proposal.job_id, // Use job_id as PoA hash identifier
+            deadline: Math.floor(Date.now() / 1000) + 86400, // 24h deadline
         });
 
         // Convert base64 from ABI factory to hex for the response if needed, 

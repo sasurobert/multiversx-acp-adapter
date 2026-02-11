@@ -24,19 +24,27 @@ export const checkoutSessionsRouter = Router();
 /**
  * Helper: Calculate totals from line items
  */
-function calculateTotals(lineItems: LineItem[]): Total[] {
+function calculateTotals(lineItems: LineItem[], fulfillmentCost: number = 0): Total[] {
     const itemsBaseAmount = lineItems.reduce((sum, item) => sum + item.base_amount, 0);
     const itemsDiscount = lineItems.reduce((sum, item) => sum + item.discount, 0);
     const subtotal = itemsBaseAmount - itemsDiscount;
     const tax = lineItems.reduce((sum, item) => sum + item.tax, 0);
-    const total = lineItems.reduce((sum, item) => sum + item.total, 0);
+    const itemsTotal = lineItems.reduce((sum, item) => sum + item.total, 0);
+    const total = itemsTotal + fulfillmentCost;
 
-    return [
+    const totals: Total[] = [
         { type: "items_base_amount", display_text: "Item(s) total", amount: itemsBaseAmount },
         { type: "subtotal", display_text: "Subtotal", amount: subtotal },
         { type: "tax", display_text: "Tax", amount: tax },
-        { type: "total", display_text: "Total", amount: total },
     ];
+
+    if (fulfillmentCost > 0) {
+        totals.push({ type: "fulfillment", display_text: "Fulfillment", amount: fulfillmentCost });
+    }
+
+    totals.push({ type: "total", display_text: "Total", amount: total });
+
+    return totals;
 }
 
 /**
@@ -99,7 +107,6 @@ checkoutSessionsRouter.post("/", async (req: Request, res: Response) => {
 
         const sessionId = `checkout_session_${randomUUID()}`;
         const lineItems = await createLineItems(body.items);
-        const totals = calculateTotals(lineItems);
 
         // Determine status based on whether we have fulfillment address
         const status = body.fulfillment_address ? "ready_for_payment" : "not_ready_for_payment";
@@ -107,6 +114,10 @@ checkoutSessionsRouter.post("/", async (req: Request, res: Response) => {
         // Get Fulfillment Options
         const fulfillmentOptions = FulfillmentService.getOptions(body.fulfillment_address);
         const defaultFulfillmentId = FulfillmentService.getDefaultOptionId(fulfillmentOptions);
+        const selectedFulfillment = fulfillmentOptions.find(o => o.id === defaultFulfillmentId);
+        const fulfillmentCost = selectedFulfillment?.total || 0;
+
+        const totals = calculateTotals(lineItems, fulfillmentCost);
 
         const session: CheckoutSession = {
             id: sessionId,
@@ -126,11 +137,15 @@ checkoutSessionsRouter.post("/", async (req: Request, res: Response) => {
             links: [
                 {
                     type: "terms_of_use",
-                    url: env.RETURN_POLICY_URL, // Using configured policy URL
+                    url: env.RETURN_POLICY_URL,
                 },
                 {
                     type: "privacy_policy",
-                    url: env.RETURN_POLICY_URL, // Or a separate one if available
+                    url: env.RETURN_POLICY_URL,
+                },
+                {
+                    type: "seller_shop_policies",
+                    url: env.SELLER_SHOP_POLICIES_URL,
                 }
             ],
         };
@@ -192,7 +207,6 @@ checkoutSessionsRouter.post("/:id", async (req: Request, res: Response) => {
         // Update items if provided
         if (body.items) {
             session.line_items = await createLineItems(body.items);
-            session.totals = calculateTotals(session.line_items);
         }
 
         // Update fulfillment address if provided
@@ -206,6 +220,18 @@ checkoutSessionsRouter.post("/:id", async (req: Request, res: Response) => {
         if (body.fulfillment_option_id) {
             session.fulfillment_option_id = body.fulfillment_option_id;
         }
+
+        // Update buyer if provided
+        if (body.buyer) {
+            session.buyer = body.buyer;
+        }
+
+        // Recalculate totals with fulfillment cost
+        const selectedFulfillment = session.fulfillment_options?.find(
+            (o: { id: string }) => o.id === session.fulfillment_option_id
+        );
+        const fulfillmentCost = selectedFulfillment?.total || 0;
+        session.totals = calculateTotals(session.line_items, fulfillmentCost);
 
         // Update status and add messages based on whether we have required info
         session.messages = [];

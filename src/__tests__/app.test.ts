@@ -7,6 +7,7 @@ jest.mock("../utils/environment", () => ({
     env: {
         VENDOR_ADDRESS: "erd1h3wp7ecggy3yyvwppehr0pa3htssd887dkykxgvwxyh9paz7gacsfcm0rt",
         ESCROW_ADDRESS: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu",
+        ESCROW_CONTRACT_ADDRESS: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu",
         MARKETPLACE_ADDRESS: "erd1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gq4hu",
         CHAIN_ID: "D",
         GAS_LIMIT: 60000000,

@@ -12,6 +12,7 @@ export interface Environment {
     MARKETPLACE_ADDRESS: string;
     VENDOR_ADDRESS: string;
     ESCROW_ADDRESS: string;
+    ESCROW_CONTRACT_ADDRESS: string;
     RELAYER_SECRET_KEY_SHARD_0: string;
     RELAYER_SECRET_KEY_SHARD_1: string;
     RELAYER_SECRET_KEY_SHARD_2: string;
@@ -27,6 +28,7 @@ export interface Environment {
     SELLER_NAME: string;
     SELLER_URL: string;
     RETURN_POLICY_URL: string;
+    SELLER_SHOP_POLICIES_URL: string;
     STORE_COUNTRY: string;
     ORDER_PERMALINK_BASE_URL: string;
     WALLET_URL: string;
@@ -67,6 +69,7 @@ function validateEnv(): Environment {
         MARKETPLACE_ADDRESS: process.env.MARKETPLACE_ADDRESS || jsonConfig.marketplace_address || "",
         VENDOR_ADDRESS: process.env.VENDOR_ADDRESS || jsonConfig.vendor_address || "",
         ESCROW_ADDRESS: process.env.ESCROW_ADDRESS || jsonConfig.escrow_address || "",
+        ESCROW_CONTRACT_ADDRESS: process.env.ESCROW_CONTRACT_ADDRESS || jsonConfig.escrow_contract_address || process.env.ESCROW_ADDRESS || jsonConfig.escrow_address || "",
         RELAYER_SECRET_KEY_SHARD_0: process.env.RELAYER_SECRET_KEY_SHARD_0 || jsonConfig.relayer_secret_key_shard_0 || process.env.RELAYER_SECRET_KEY || jsonConfig.relayer_secret_key || "",
         RELAYER_SECRET_KEY_SHARD_1: process.env.RELAYER_SECRET_KEY_SHARD_1 || jsonConfig.relayer_secret_key_shard_1 || process.env.RELAYER_SECRET_KEY || jsonConfig.relayer_secret_key || "",
         RELAYER_SECRET_KEY_SHARD_2: process.env.RELAYER_SECRET_KEY_SHARD_2 || jsonConfig.relayer_secret_key_shard_2 || process.env.RELAYER_SECRET_KEY || jsonConfig.relayer_secret_key || "",
@@ -82,6 +85,7 @@ function validateEnv(): Environment {
         SELLER_NAME: process.env.SELLER_NAME || jsonConfig.seller_name || "MultiversX Store",
         SELLER_URL: process.env.SELLER_URL || jsonConfig.seller_url || "https://multiversx.com",
         RETURN_POLICY_URL: process.env.RETURN_POLICY_URL || jsonConfig.return_policy_url || "https://multiversx.com/terms",
+        SELLER_SHOP_POLICIES_URL: process.env.SELLER_SHOP_POLICIES_URL || jsonConfig.seller_shop_policies_url || "https://multiversx.com/policies",
         STORE_COUNTRY: process.env.STORE_COUNTRY || jsonConfig.store_country || "US",
         ORDER_PERMALINK_BASE_URL: process.env.ORDER_PERMALINK_BASE_URL || jsonConfig.order_permalink_base_url || "https://multiversx.com/orders",
         WALLET_URL: process.env.WALLET_URL || jsonConfig.wallet_url || "https://wallet.multiversx.com"

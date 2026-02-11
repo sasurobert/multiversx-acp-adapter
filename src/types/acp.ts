@@ -165,6 +165,7 @@ export interface UpdateCheckoutSessionRequest {
   items?: Item[];
   fulfillment_address?: Address;
   fulfillment_option_id?: string;
+  buyer?: Buyer;
 }
 
 export interface CompleteCheckoutSessionRequest {
